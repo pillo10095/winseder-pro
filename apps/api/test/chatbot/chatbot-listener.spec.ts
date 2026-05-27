@@ -6,6 +6,7 @@ import { RuleEvaluatorService } from '@/modules/chatbot/services/rule-evaluator.
 import { AutoReplyService } from '@/modules/chatbot/services/auto-reply.service';
 import { AutomationRuleRepository } from '@/modules/chatbot/repositories/automation-rule.repository';
 import { WebhookConfigRepository } from '@/modules/webhooks/repositories/webhook-config.repository';
+import { SessionRepository } from '@/modules/whatsapp/repositories/session.repository';
 import { MessageEventPayload } from '@/modules/whatsapp/services/message-relay.service';
 
 describe('ChatbotListenerService', () => {
@@ -14,6 +15,7 @@ describe('ChatbotListenerService', () => {
   let webhookRepo: jest.Mocked<WebhookConfigRepository>;
   let evaluator: jest.Mocked<RuleEvaluatorService>;
   let autoReply: jest.Mocked<AutoReplyService>;
+  let sessionRepo: jest.Mocked<SessionRepository>;
 
   const payload: MessageEventPayload = {
     sessionId: 'session-1',
@@ -39,7 +41,11 @@ describe('ChatbotListenerService', () => {
     } as any;
 
     autoReply = {
-      execute: jest.fn().mockResolvedValue(true),
+      execute: jest.fn(),
+    } as any;
+
+    sessionRepo = {
+      findOne: jest.fn().mockResolvedValue({ company_id: 'company-1' }),
     } as any;
 
     const module: TestingModule = await Test.createTestingModule({
@@ -49,6 +55,7 @@ describe('ChatbotListenerService', () => {
         { provide: WebhookConfigRepository, useValue: webhookRepo },
         { provide: RuleEvaluatorService, useValue: evaluator },
         { provide: AutoReplyService, useValue: autoReply },
+        { provide: SessionRepository, useValue: sessionRepo },
       ],
     }).compile();
 

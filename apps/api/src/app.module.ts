@@ -20,6 +20,7 @@ import { MediaModule } from './modules/media/media.module';
 import { ChatbotModule } from './modules/chatbot/chatbot.module';
 import { InboxModule } from './modules/inbox/inbox.module';
 import { WebhooksModule } from './modules/webhooks/webhooks.module';
+import { CampaignsModule } from './modules/campaigns/campaigns.module';
 import { CrmModule } from './modules/crm/crm.module';
 
 /**
@@ -59,6 +60,7 @@ import { CrmModule } from './modules/crm/crm.module';
     ChatbotModule,
     InboxModule,
     WebhooksModule,
+    CampaignsModule,
     CrmModule
   ]
 })

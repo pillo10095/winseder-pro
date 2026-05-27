@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 
 import { MESSAGE_EVENTS, MessageEventPayload } from '../../whatsapp/services/message-relay.service';
+import { SessionRepository } from '../../whatsapp/repositories/session.repository';
 import { AutomationRuleRepository } from '../repositories/automation-rule.repository';
 import { RuleEvaluatorService } from './rule-evaluator.service';
 import { AutoReplyService } from './auto-reply.service';
@@ -16,6 +17,7 @@ export class ChatbotListenerService {
     private readonly webhookRepo: WebhookConfigRepository,
     private readonly evaluator: RuleEvaluatorService,
     private readonly autoReply: AutoReplyService,
+    private readonly sessionRepo: SessionRepository,
   ) {}
 
   @OnEvent(MESSAGE_EVENTS.INBOUND)
@@ -24,7 +26,14 @@ export class ChatbotListenerService {
       // Only evaluate rules for inbound messages (not our own replies)
       if (payload.fromMe) return;
 
-      const rules = await this.ruleRepo.findActiveByCompanyId(payload.sessionId);
+      // Resolve company_id from the WhatsApp session
+      const session = await this.sessionRepo.findOne({
+        where: { id: payload.sessionId },
+        select: ['company_id'],
+      });
+      if (!session) return;
+
+      const rules = await this.ruleRepo.findActiveByCompanyId(session.company_id);
 
       if (rules.length === 0) return;
 
