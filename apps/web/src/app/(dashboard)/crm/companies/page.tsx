@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useCompanies } from '@/src/hooks/use-companies';
-import { Search } from 'lucide-react';
+import { ContactForm } from '@/src/components/crm/contact-form';
+import { Search, Plus } from 'lucide-react';
 
 export default function CompaniesPage() {
-  const { companies, loading, error, fetchCompanies } = useCompanies();
+  const { companies, loading, error, fetchCompanies, createCompany } = useCompanies();
   const [search, setSearch] = useState('');
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     fetchCompanies('current');
@@ -27,8 +29,12 @@ export default function CompaniesPage() {
             {loading ? 'Loading...' : `${filtered.length} companies`}
           </p>
         </div>
-        <button className="rounded-sm bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:brightness-110 transition-all">
-          + Add Company
+        <button
+          onClick={() => setShowForm(true)}
+          className="flex items-center gap-2 rounded-sm bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:brightness-110 transition-all"
+        >
+          <Plus className="h-4 w-4" />
+          Add Company
         </button>
       </div>
 
@@ -83,6 +89,16 @@ export default function CompaniesPage() {
           </tbody>
         </table>
       </div>
+
+      {showForm && (
+        <ContactForm
+          onClose={() => setShowForm(false)}
+          onSave={async (data) => {
+            await createCompany('current', { name: data.company_name || data.name, industry: data.role });
+            setShowForm(false);
+          }}
+        />
+      )}
     </div>
   );
 }

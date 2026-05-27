@@ -7,17 +7,21 @@ import { useDeals } from '@/src/hooks/use-deals';
 import { useActivities } from '@/src/hooks/use-activities';
 import { usePipeline } from '@/src/hooks/use-pipeline';
 import { DealStageEditor } from '@/src/components/crm/deal-stage-editor';
+import { DealForm } from '@/src/components/crm/deal-form';
 import { ActivityForm } from '@/src/components/crm/activity-form';
 import { ActivityTimeline } from '@/src/components/crm/activity-timeline';
 import { WonLostModal } from '@/src/components/crm/won-lost-modal';
+import { ConfirmDialog } from '@/src/components/crm/confirm-dialog';
 import { fetchWithAuth } from '@/src/lib/api';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Trash2 } from 'lucide-react';
 
 export default function DealDetailPage({ params }: { params: { id: string } }) {
-  const { current, currentLoading, fetchDealById } = useDeals();
+  const { current, currentLoading, fetchDealById, updateDeal, deleteDeal } = useDeals();
   const { createActivity, fetchActivities, activities } = useActivities();
   const { stages, fetchStages } = usePipeline();
   const [showActivityForm, setShowActivityForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showWonLost, setShowWonLost] = useState<{ targetStageId: string; targetStageName: string } | null>(null);
 
   useEffect(() => {
@@ -123,6 +127,18 @@ export default function DealDetailPage({ params }: { params: { id: string } }) {
             <p className="text-sm text-muted-foreground">{current!.company_name || '—'}</p>
           </div>
           <div className="flex gap-2">
+            <button
+              onClick={() => setShowEditForm(true)}
+              className="rounded-sm border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-muted-light hover:text-foreground transition-colors"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="rounded-sm border border-border px-4 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
             {!isClosed && (
               <>
                 <button
@@ -237,6 +253,37 @@ export default function DealDetailPage({ params }: { params: { id: string } }) {
         <ActivityForm
           onClose={() => setShowActivityForm(false)}
           onSave={handleLogActivity}
+        />
+      )}
+
+      {showEditForm && current && (
+        <DealForm
+          stages={stages}
+          initial={{
+            name: current.name,
+            value: current.value,
+            pipeline_stage_id: current.pipeline_stage_id,
+            company_name: current.company_name,
+            assigned_to: current.assigned_to,
+            close_date: current.close_date,
+          }}
+          onClose={() => setShowEditForm(false)}
+          onSave={async (data) => {
+            await updateDeal(current.id, data);
+            setShowEditForm(false);
+          }}
+        />
+      )}
+
+      {showDeleteConfirm && (
+        <ConfirmDialog
+          title="Delete Deal"
+          message="Are you sure you want to delete this deal? This action cannot be undone."
+          onConfirm={async () => {
+            await deleteDeal(current!.id);
+            window.location.href = '/crm/deals';
+          }}
+          onCancel={() => setShowDeleteConfirm(false)}
         />
       )}
 

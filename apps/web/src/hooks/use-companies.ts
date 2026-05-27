@@ -24,7 +24,6 @@ export function useCompanies() {
       if (!res.ok) throw new Error('Failed to fetch companies');
 
       const data = await res.json();
-      // Derive companies from contacts
       const contacts: any[] = data.data ?? [];
       const companyMap = new Map<string, Company>();
       for (const c of contacts) {
@@ -48,5 +47,18 @@ export function useCompanies() {
     }
   }, []);
 
-  return { companies, loading, error, fetchCompanies };
+  const createCompany = useCallback(async (companyId: string, dto: { name: string; industry?: string }) => {
+    // Create a contact with the company name to register the company
+    const res = await fetchWithAuth(`${API_URL}/crm/contacts`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: dto.name, company_name: dto.name, role: dto.industry || undefined }),
+    });
+
+    if (!res.ok) throw new Error('Failed to create company');
+    await fetchCompanies(companyId);
+    return true;
+  }, [fetchCompanies]);
+
+  return { companies, loading, error, fetchCompanies, createCompany };
 }

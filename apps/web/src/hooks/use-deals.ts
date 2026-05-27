@@ -85,9 +85,23 @@ export function useDeals() {
     return true;
   }, []);
 
+  const updateDeal = useCallback(async (id: string, dto: Partial<Deal>) => {
+    const res = await fetchWithAuth(`${API_URL}/crm/deals/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dto),
+    });
+
+    if (!res.ok) throw new Error('Failed to update deal');
+    const updated = await res.json();
+    setCurrent(updated);
+    setDeals((prev) => prev.map((d) => (d.id === id ? { ...d, ...updated } : d)));
+    return updated;
+  }, []);
+
   return {
     deals, total, loading, error,
     current, currentLoading,
-    fetchDeals, fetchDealById, deleteDeal,
+    fetchDeals, fetchDealById, deleteDeal, updateDeal,
   };
 }

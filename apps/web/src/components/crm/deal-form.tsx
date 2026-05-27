@@ -7,20 +7,33 @@ interface DealFormProps {
   stages: { id: string; name: string; color: string }[];
   onClose: () => void;
   onSave: (data: any) => void;
+  initial?: {
+    name: string;
+    value: number;
+    pipeline_stage_id: string;
+    contact_name?: string;
+    company_name?: string;
+    close_date?: string;
+    assigned_to?: string;
+  };
 }
 
-export function DealForm({ stages, onClose, onSave }: DealFormProps) {
-  const [name, setName] = useState('');
-  const [value, setValue] = useState('');
-  const [stageId, setStageId] = useState(stages[0]?.id || '');
-  const [contactName, setContactName] = useState('');
-  const [companyName, setCompanyName] = useState('');
+export function DealForm({ stages, onClose, onSave, initial }: DealFormProps) {
+  const [name, setName] = useState(initial?.name ?? '');
+  const [value, setValue] = useState(initial?.value?.toString() ?? '');
+  const [stageId, setStageId] = useState(initial?.pipeline_stage_id ?? stages[0]?.id ?? '');
+  const [contactName, setContactName] = useState(initial?.contact_name ?? '');
+  const [companyName, setCompanyName] = useState(initial?.company_name ?? '');
+  const [closeDate, setCloseDate] = useState(initial?.close_date?.split('T')[0] ?? '');
+  const [assignedTo, setAssignedTo] = useState(initial?.assigned_to ?? '');
+
+  const isEdit = !!initial;
 
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/30">
       <div className="w-full max-w-lg rounded-sm bg-card border border-border p-6 shadow-constructivist">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-foreground">New Deal</h3>
+          <h3 className="text-lg font-semibold text-foreground">{isEdit ? 'Edit Deal' : 'New Deal'}</h3>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <X className="h-4 w-4" />
           </button>
@@ -67,6 +80,27 @@ export function DealForm({ stages, onClose, onSave }: DealFormProps) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
+              <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Close Date</label>
+              <input
+                type="date"
+                value={closeDate}
+                onChange={(e) => setCloseDate(e.target.value)}
+                className="mt-1 w-full rounded-sm border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Assigned</label>
+              <input
+                value={assignedTo}
+                onChange={(e) => setAssignedTo(e.target.value)}
+                className="mt-1 w-full rounded-sm border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                placeholder="Team member name"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
               <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Contact</label>
               <input
                 value={contactName}
@@ -101,11 +135,14 @@ export function DealForm({ stages, onClose, onSave }: DealFormProps) {
                 value: parseFloat(value) || 0,
                 pipeline_stage_id: stageId,
                 company_name: companyName || undefined,
+                close_date: closeDate || undefined,
+                assigned_to: assignedTo || undefined,
               })
             }
-            className="rounded-sm bg-primary px-4 py-2 text-sm text-primary-foreground hover:brightness-110 transition-all"
+            disabled={!name.trim()}
+            className="rounded-sm bg-primary px-4 py-2 text-sm text-primary-foreground hover:brightness-110 transition-all disabled:opacity-50"
           >
-            Save
+            {isEdit ? 'Update' : 'Save'}
           </button>
         </div>
       </div>

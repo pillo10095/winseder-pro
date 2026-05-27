@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePipeline } from '@/src/hooks/use-pipeline';
 import { useDeals } from '@/src/hooks/use-deals';
 import { useActivities } from '@/src/hooks/use-activities';
-import { BarChart3, DollarSign, TrendingUp, Target, ArrowRight } from 'lucide-react';
+import { BarChart3, DollarSign, TrendingUp, Target, ArrowRight, PieChart } from 'lucide-react';
 
 export default function DashboardPage() {
   const { stages, deals, loading: pipeLoading, fetchPipeline, filteredDeals } = usePipeline();
@@ -25,6 +25,14 @@ export default function DashboardPage() {
   const conversionRate = closedCount > 0
     ? Math.round((wonDeals.length / closedCount) * 100)
     : 0;
+
+  // Analytics from full deal list
+  const allWon = allDeals.filter((d) => d.pipeline_stage_id === '5');
+  const allLost = allDeals.filter((d) => d.pipeline_stage_id === '6');
+  const wonTotalValue = allWon.reduce((s, d) => s + d.value, 0);
+  const lostTotalValue = allLost.reduce((s, d) => s + d.value, 0);
+  const wonAvgValue = allWon.length > 0 ? Math.round(wonTotalValue / allWon.length) : 0;
+  const lostAvgValue = allLost.length > 0 ? Math.round(lostTotalValue / allLost.length) : 0;
 
   const stageMetrics = stages.map((stage) => {
     const stageDeals = deals.filter((d) => d.stage_id === stage.id);
@@ -97,6 +105,60 @@ export default function DashboardPage() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Won/Lost Analytics */}
+      <div className="rounded-sm border border-border bg-card p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <PieChart className="h-5 w-5 text-primary" />
+          <h2 className="text-base font-semibold text-foreground">Won / Lost Analytics</h2>
+        </div>
+        <div className="grid grid-cols-4 gap-6">
+          <div>
+            <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Closed Won</span>
+            <p className="mt-1 text-2xl font-semibold text-success">{allWon.length}</p>
+            <p className="text-sm text-muted-foreground">${wonTotalValue.toLocaleString()}</p>
+          </div>
+          <div>
+            <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Closed Lost</span>
+            <p className="mt-1 text-2xl font-semibold text-destructive">{allLost.length}</p>
+            <p className="text-sm text-muted-foreground">${lostTotalValue.toLocaleString()}</p>
+          </div>
+          <div>
+            <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Avg Won Deal</span>
+            <p className="mt-1 text-2xl font-semibold text-foreground">${wonAvgValue.toLocaleString()}</p>
+            <p className="text-sm text-muted-foreground">per closed won</p>
+          </div>
+          <div>
+            <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Avg Lost Deal</span>
+            <p className="mt-1 text-2xl font-semibold text-foreground">${lostAvgValue.toLocaleString()}</p>
+            <p className="text-sm text-muted-foreground">per closed lost</p>
+          </div>
+        </div>
+
+        {/* Win rate bar */}
+        {closedCount > 0 && (
+          <div className="mt-4">
+            <div className="flex items-center justify-between text-sm mb-1">
+              <span className="text-muted-foreground">Win rate</span>
+              <span className="font-medium text-foreground">{conversionRate}%</span>
+            </div>
+            <div className="h-3 w-full rounded-sm bg-muted-light overflow-hidden flex">
+              <div
+                className="h-full rounded-sm bg-success transition-all duration-500"
+                style={{ width: `${conversionRate}%` }}
+              />
+              <div
+                className="h-full rounded-sm bg-destructive transition-all duration-500"
+                style={{ width: `${100 - conversionRate}%` }}
+              />
+            </div>
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>{allWon.length} won ({conversionRate}%)</span>
+              <span>{allLost.length} lost ({100 - conversionRate}%)</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Bottom: top deals + recent activity */}

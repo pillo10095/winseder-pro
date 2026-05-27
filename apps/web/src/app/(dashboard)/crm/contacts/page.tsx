@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { useContacts } from '@/src/hooks/use-contacts';
 import { ContactForm } from '@/src/components/crm/contact-form';
 import { ConfirmDialog } from '@/src/components/crm/confirm-dialog';
-import { Plus, Search, Trash2 } from 'lucide-react';
+import { exportToCsv } from '@/src/lib/export-csv';
+import { Plus, Search, Trash2, Download } from 'lucide-react';
 
 export default function ContactsPage() {
   const { contacts, total, loading, error, fetchContacts, createContact, deleteContact } = useContacts();
@@ -26,13 +27,26 @@ export default function ContactsPage() {
             {loading ? 'Loading...' : `${total} contact${total !== 1 ? 's' : ''}`}
           </p>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 rounded-sm bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:brightness-110 transition-all"
-        >
-          <Plus className="h-4 w-4" />
-          Add Contact
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => exportToCsv(
+              'contacts',
+              ['Name', 'Email', 'Phone', 'Company', 'Source'],
+              contacts.map((c) => [c.name, c.email || '', c.phone || '', c.company_name || '', c.source || '']),
+            )}
+            className="flex items-center gap-2 rounded-sm border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-muted-light transition-colors"
+          >
+            <Download className="h-4 w-4" />
+            Export
+          </button>
+          <button
+            onClick={() => setShowForm(true)}
+            className="flex items-center gap-2 rounded-sm bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:brightness-110 transition-all"
+          >
+            <Plus className="h-4 w-4" />
+            Add Contact
+          </button>
+        </div>
       </div>
 
       <div className="relative">

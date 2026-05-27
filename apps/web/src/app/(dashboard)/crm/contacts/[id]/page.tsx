@@ -9,14 +9,16 @@ import { useActivities } from '@/src/hooks/use-activities';
 import { ActivityForm } from '@/src/components/crm/activity-form';
 import { ActivityTimeline } from '@/src/components/crm/activity-timeline';
 import { ContactForm } from '@/src/components/crm/contact-form';
-import { ArrowLeft } from 'lucide-react';
+import { ConfirmDialog } from '@/src/components/crm/confirm-dialog';
+import { ArrowLeft, Trash2 } from 'lucide-react';
 
 export default function ContactDetailPage({ params }: { params: { id: string } }) {
-  const { current, currentLoading, fetchContactById, updateContact } = useContacts();
+  const { current, currentLoading, fetchContactById, updateContact, deleteContact } = useContacts();
   const { deals, fetchDeals } = useDeals();
   const { activities, fetchActivities, createActivity } = useActivities();
   const [showActivityForm, setShowActivityForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     fetchContactById(params.id);
@@ -65,12 +67,20 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
               {[current!.role, current!.company_name].filter(Boolean).join(' at ') || '—'}
             </p>
           </div>
-          <button
-            onClick={() => setShowEditForm(true)}
-            className="rounded-sm border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted-light hover:text-foreground transition-colors"
-          >
-            Edit
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="rounded-sm border border-border px-4 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setShowEditForm(true)}
+              className="rounded-sm border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted-light hover:text-foreground transition-colors"
+            >
+              Edit
+            </button>
+          </div>
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-4">
@@ -142,6 +152,18 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
           />
         </div>
       </div>
+
+      {showDeleteConfirm && current && (
+        <ConfirmDialog
+          title="Delete Contact"
+          message="Are you sure you want to delete this contact? This action cannot be undone."
+          onConfirm={async () => {
+            await deleteContact(current.id);
+            window.location.href = '/crm/contacts';
+          }}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
+      )}
 
       {showActivityForm && (
         <ActivityForm

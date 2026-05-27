@@ -7,7 +7,8 @@ import { usePipeline } from '@/src/hooks/use-pipeline';
 import { DealForm } from '@/src/components/crm/deal-form';
 import { ConfirmDialog } from '@/src/components/crm/confirm-dialog';
 import { fetchWithAuth, API_URL } from '@/src/lib/api';
-import { Search, Trash2 } from 'lucide-react';
+import { exportToCsv } from '@/src/lib/export-csv';
+import { Search, Trash2, Download } from 'lucide-react';
 
 const STAGE_NAMES: Record<string, string> = {
   '1': 'Lead',
@@ -47,12 +48,32 @@ export default function DealsPage() {
               : `${filtered.length} deals · $${filtered.reduce((s, d) => s + d.value, 0).toLocaleString()} total`}
           </p>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="rounded-sm bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:brightness-110 transition-all"
-        >
-          + Add Deal
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => exportToCsv(
+              'deals',
+              ['Name', 'Value', 'Stage', 'Company', 'Close Date', 'Assigned'],
+              filtered.map((d) => [
+                d.name,
+                d.value.toString(),
+                STAGE_NAMES[d.pipeline_stage_id] || 'Unknown',
+                d.company_name || '',
+                d.close_date ? new Date(d.close_date).toLocaleDateString() : '',
+                d.assigned_to || '',
+              ]),
+            )}
+            className="flex items-center gap-2 rounded-sm border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-muted-light transition-colors"
+          >
+            <Download className="h-4 w-4" />
+            Export
+          </button>
+          <button
+            onClick={() => setShowForm(true)}
+            className="rounded-sm bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:brightness-110 transition-all"
+          >
+            + Add Deal
+          </button>
+        </div>
       </div>
 
       <div className="relative">
