@@ -65,5 +65,15 @@ export function useActivities() {
     [],
   );
 
-  return { activities, loading, error, fetchActivities, createActivity };
+  const deleteActivity = useCallback(async (id: string) => {
+    const res = await fetchWithAuth(`${API_URL}/crm/activities/${id}`, {
+      method: 'DELETE',
+    });
+
+    if (!res.ok) throw new Error('Failed to delete activity');
+    setActivities((prev) => prev.filter((a) => a.id !== id));
+    return true;
+  }, []);
+
+  return { activities, loading, error, fetchActivities, createActivity, deleteActivity };
 }

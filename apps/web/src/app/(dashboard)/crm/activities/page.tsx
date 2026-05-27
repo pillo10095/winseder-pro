@@ -3,7 +3,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useActivities } from '@/src/hooks/use-activities';
 import { ActivityForm } from '@/src/components/crm/activity-form';
-import { Phone, Mail, Handshake, FileText, CheckCircle, Pin } from 'lucide-react';
+import { ConfirmDialog } from '@/src/components/crm/confirm-dialog';
+import { Phone, Mail, Handshake, FileText, CheckCircle, Pin, Trash2 } from 'lucide-react';
 
 const TYPE_ICONS: Record<string, typeof Phone> = {
   call: Phone,
@@ -14,9 +15,10 @@ const TYPE_ICONS: Record<string, typeof Phone> = {
 };
 
 export default function ActivitiesPage() {
-  const { activities, loading, error, fetchActivities, createActivity } = useActivities();
+  const { activities, loading, error, fetchActivities, createActivity, deleteActivity } = useActivities();
   const [filter, setFilter] = useState('all');
   const [showForm, setShowForm] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   useEffect(() => {
     fetchActivities('current', filter === 'all' ? undefined : filter);
@@ -103,11 +105,30 @@ export default function ActivitiesPage() {
                 <span className="rounded-sm px-2 py-0.5 text-xs font-medium capitalize bg-muted-light text-muted-foreground">
                   {activity.type}
                 </span>
+                <button
+                  onClick={() => setDeleting(activity.id)}
+                  className="text-muted-foreground hover:text-destructive transition-colors shrink-0"
+                  title="Delete activity"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
               </div>
             );
           })
         )}
       </div>
+
+      {deleting && (
+        <ConfirmDialog
+          title="Delete Activity"
+          message="Are you sure you want to delete this activity record?"
+          onConfirm={async () => {
+            await deleteActivity(deleting);
+            setDeleting(null);
+          }}
+          onCancel={() => setDeleting(null)}
+        />
+      )}
 
       {showForm && (
         <ActivityForm

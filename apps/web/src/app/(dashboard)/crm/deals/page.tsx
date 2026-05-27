@@ -5,8 +5,9 @@ import Link from 'next/link';
 import { useDeals } from '@/src/hooks/use-deals';
 import { usePipeline } from '@/src/hooks/use-pipeline';
 import { DealForm } from '@/src/components/crm/deal-form';
+import { ConfirmDialog } from '@/src/components/crm/confirm-dialog';
 import { fetchWithAuth, API_URL } from '@/src/lib/api';
-import { Search } from 'lucide-react';
+import { Search, Trash2 } from 'lucide-react';
 
 const STAGE_NAMES: Record<string, string> = {
   '1': 'Lead',
@@ -18,10 +19,11 @@ const STAGE_NAMES: Record<string, string> = {
 };
 
 export default function DealsPage() {
-  const { deals, total, loading, error, fetchDeals } = useDeals();
+  const { deals, total, loading, error, fetchDeals, deleteDeal } = useDeals();
   const { stages, fetchStages } = usePipeline();
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   useEffect(() => {
     fetchDeals('current', undefined, undefined, search);
@@ -78,6 +80,7 @@ export default function DealsPage() {
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Stage</th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Close Date</th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Assigned</th>
+              <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border bg-card">
@@ -113,12 +116,33 @@ export default function DealsPage() {
                       : '—'}
                   </td>
                   <td className="px-6 py-4 text-sm text-muted-foreground">{deal.assigned_to || '—'}</td>
+                  <td className="px-6 py-4 text-right">
+                    <button
+                      onClick={(e) => { e.preventDefault(); setDeleting(deal.id); }}
+                      className="text-muted-foreground hover:text-destructive transition-colors"
+                      title="Delete deal"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
       </div>
+
+      {deleting && (
+        <ConfirmDialog
+          title="Delete Deal"
+          message="Are you sure you want to delete this deal? This action cannot be undone."
+          onConfirm={async () => {
+            await deleteDeal(deleting);
+            setDeleting(null);
+          }}
+          onCancel={() => setDeleting(null)}
+        />
+      )}
 
       {showForm && (
         <DealForm

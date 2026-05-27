@@ -4,12 +4,14 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useContacts } from '@/src/hooks/use-contacts';
 import { ContactForm } from '@/src/components/crm/contact-form';
-import { Plus, Search } from 'lucide-react';
+import { ConfirmDialog } from '@/src/components/crm/confirm-dialog';
+import { Plus, Search, Trash2 } from 'lucide-react';
 
 export default function ContactsPage() {
-  const { contacts, total, loading, error, fetchContacts, createContact } = useContacts();
+  const { contacts, total, loading, error, fetchContacts, createContact, deleteContact } = useContacts();
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   useEffect(() => {
     fetchContacts('current', search);
@@ -57,6 +59,7 @@ export default function ContactsPage() {
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Phone</th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Company</th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Source</th>
+              <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border bg-card">
@@ -81,12 +84,33 @@ export default function ContactsPage() {
                   <td className="px-6 py-4 text-sm text-muted-foreground">{contact.phone || '—'}</td>
                   <td className="px-6 py-4 text-sm text-muted-foreground">{contact.company_name || '—'}</td>
                   <td className="px-6 py-4 text-sm text-muted-foreground">{contact.source || '—'}</td>
+                  <td className="px-6 py-4 text-right">
+                    <button
+                      onClick={(e) => { e.preventDefault(); setDeleting(contact.id); }}
+                      className="text-muted-foreground hover:text-destructive transition-colors"
+                      title="Delete contact"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
       </div>
+
+      {deleting && (
+        <ConfirmDialog
+          title="Delete Contact"
+          message="Are you sure you want to delete this contact? This action cannot be undone."
+          onConfirm={async () => {
+            await deleteContact(deleting);
+            setDeleting(null);
+          }}
+          onCancel={() => setDeleting(null)}
+        />
+      )}
 
       {showForm && (
         <ContactForm

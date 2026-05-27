@@ -74,9 +74,20 @@ export function useDeals() {
     }
   }, []);
 
+  const deleteDeal = useCallback(async (id: string) => {
+    const res = await fetchWithAuth(`${API_URL}/crm/deals/${id}`, {
+      method: 'DELETE',
+    });
+
+    if (!res.ok) throw new Error('Failed to delete deal');
+    setDeals((prev) => prev.filter((d) => d.id !== id));
+    setTotal((t) => t - 1);
+    return true;
+  }, []);
+
   return {
     deals, total, loading, error,
     current, currentLoading,
-    fetchDeals, fetchDealById,
+    fetchDeals, fetchDealById, deleteDeal,
   };
 }

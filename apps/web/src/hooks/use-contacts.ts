@@ -100,9 +100,20 @@ export function useContacts() {
     [],
   );
 
+  const deleteContact = useCallback(async (id: string) => {
+    const res = await fetchWithAuth(`${API_URL}/crm/contacts/${id}`, {
+      method: 'DELETE',
+    });
+
+    if (!res.ok) throw new Error('Failed to delete contact');
+    setContacts((prev) => prev.filter((c) => c.id !== id));
+    setTotal((t) => t - 1);
+    return true;
+  }, []);
+
   return {
     contacts, total, loading, error,
     current, currentLoading,
-    fetchContacts, fetchContactById, createContact, updateContact,
+    fetchContacts, fetchContactById, createContact, updateContact, deleteContact,
   };
 }
