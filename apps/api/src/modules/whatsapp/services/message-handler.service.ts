@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { proto, WAMessageContent } from '@whiskeysockets/baileys';
+import { proto } from '@whiskeysockets/baileys';
 
 import { MessageStatus, MessageType } from '../entities/message.entity';
 import { MessageRepository } from '../repositories/message.repository';
@@ -173,6 +173,7 @@ export class MessageHandlerService {
     return this.toParsedMessage(message);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private toParsedMessage(msg: any): ParsedMessage {
     return {
       messageId: msg.message_id,

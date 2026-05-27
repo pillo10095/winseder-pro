@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import type { DeepPartial } from 'typeorm';
 
 import { Deal } from '../entities/deal.entity';
 import { DealRepository } from '../repositories/deal.repository';
@@ -36,12 +37,12 @@ export class DealService {
   }
 
   async update(id: string, dto: UpdateDealDto): Promise<Deal | null> {
-    await this.dealRepo.update(id, dto as any);
+    await this.dealRepo.update(id, dto as unknown as DeepPartial<Deal>);
     return this.findById(id);
   }
 
   async moveStage(id: string, stageId: string, reason?: string): Promise<Deal | null> {
-    const update: any = { pipeline_stage_id: stageId };
+    const update: DeepPartial<Deal> = { pipeline_stage_id: stageId };
     if (reason) update.won_lost_reason = reason;
     await this.dealRepo.update(id, update);
     return this.findById(id);

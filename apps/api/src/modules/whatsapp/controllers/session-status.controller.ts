@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Param,
-  Post,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -24,9 +23,10 @@ export class SessionStatusController {
     try {
       const qr = await this.sessionManager.getQrCode(id, req.companyId!);
       return { data: { qr } };
-    } catch (err: any) {
+    } catch (err: unknown) {
       // QR not ready yet — client should listen via WebSocket
-      return { data: { qr: null, message: err.message } };
+      const message = err instanceof Error ? err.message : 'QR not available';
+      return { data: { qr: null, message } };
     }
   }
 

@@ -65,6 +65,7 @@ export class AutoReplyService {
         return true;
 
       default:
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.logger.warn(`Unknown action type: ${(action as any).type}`);
         return false;
     }

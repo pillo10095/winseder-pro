@@ -92,7 +92,7 @@ export class BaileysReconnectService {
   }
 
   onApplicationShutdown(): void {
-    for (const [sessionId, timer] of this.timers) {
+    for (const [, timer] of this.timers) {
       clearTimeout(timer);
     }
     this.timers.clear();

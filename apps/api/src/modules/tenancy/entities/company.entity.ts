@@ -21,6 +21,7 @@ export class Company {
   logo_url!: string;
 
   @Column({ type: 'json', nullable: true })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   settings!: Record<string, any>;
 
   @Column({ default: true })

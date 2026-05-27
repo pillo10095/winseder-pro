@@ -80,6 +80,7 @@ export class WhatsAppGateway implements OnGatewayConnection, OnGatewayDisconnect
   // --- Client-side event handlers ---
 
   @SubscribeMessage(WS_CLIENT_EVENTS.REQUEST_QR)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handleRequestQr(client: Socket, _payload: { sessionId: string }): void {
     const companyId = client.handshake.query.companyId as string;
     this.logger.debug(`QR requested by company ${companyId}`);
@@ -88,6 +89,7 @@ export class WhatsAppGateway implements OnGatewayConnection, OnGatewayDisconnect
   }
 
   @SubscribeMessage(WS_CLIENT_EVENTS.REQUEST_STATUS)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handleRequestStatus(client: Socket, _payload: { sessionId: string }): void {
     const companyId = client.handshake.query.companyId as string;
     this.logger.debug(`Status requested by company ${companyId}`);

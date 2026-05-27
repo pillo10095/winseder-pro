@@ -54,6 +54,7 @@ export class Subscription {
   cancelled_at!: Date;
 
   @Column('simple-json', { nullable: true })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata!: Record<string, any>;
 
   @CreateDateColumn()

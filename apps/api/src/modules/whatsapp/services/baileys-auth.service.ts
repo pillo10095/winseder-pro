@@ -28,14 +28,14 @@ export class BaileysAuthService {
     const session = await this.sessionRepository.findOne({ where: { id: sessionId } });
 
     let creds: AuthenticationCreds;
-    let keys: Record<string, Record<string, any>> = {};
+    let keys: Record<string, Record<string, unknown>> = {};
 
     if (session?.auth_state) {
       try {
         const parsed = JSON.parse(session.auth_state, BufferJSON.reviver);
         creds = parsed.creds;
         keys = parsed.keys || {};
-      } catch (err) {
+      } catch {
         this.logger.warn(`Failed to parse auth state for session ${sessionId}, re-initializing`);
         creds = initAuthCreds();
       }
@@ -60,8 +60,9 @@ export class BaileysAuthService {
             type: T,
             ids: string[],
           ): Promise<{ [id: string]: SignalDataTypeMap[T] }> => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const data = keys[type as string] as Record<string, any> | undefined;
-            const result: Record<string, any> = {};
+            const result: Record<string, unknown> = {};
             for (const id of ids) {
               if (data?.[id] !== undefined) {
                 result[id] = data[id];
@@ -69,6 +70,7 @@ export class BaileysAuthService {
             }
             return result as { [id: string]: SignalDataTypeMap[T] };
           },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           set: async (data: Partial<Record<keyof SignalDataTypeMap, Record<string, any>>>): Promise<void> => {
             for (const type in data) {
               const entries = data[type as keyof SignalDataTypeMap];

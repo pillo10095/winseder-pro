@@ -3,15 +3,14 @@ import {
   Controller,
   Param,
   Post,
-  Req,
   UseGuards,
 } from '@nestjs/common';
-import { Request } from 'express';
 
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { SendMessageDto } from '../dto/send-message.dto';
 import { MessageRepository } from '../repositories/message.repository';
 import { ConversationRepository } from '../repositories/conversation.repository';
+import { MessageStatus, MessageType } from '../entities/message.entity';
 
 @Controller('whatsapp/sessions/:sessionId/messages')
 @UseGuards(JwtAuthGuard)
@@ -28,7 +27,6 @@ export class MessageController {
   async send(
     @Param('sessionId') sessionId: string,
     @Body() dto: SendMessageDto,
-    @Req() req: Request,
   ) {
     // The actual sending logic will be added when BaileysClient
     // is integrated with the controller layer.
@@ -43,11 +41,11 @@ export class MessageController {
         conversation_id: conversationId,
         session_id: sessionId,
         message_id: `pending-${Date.now()}`,
-        type: dto.type ?? 'text' as any,
+        type: dto.type ?? MessageType.TEXT,
         content: dto.content,
         from_me: true,
         timestamp: new Date(),
-        status: 'PENDING' as any,
+        status: MessageStatus.PENDING,
       }),
     );
 
