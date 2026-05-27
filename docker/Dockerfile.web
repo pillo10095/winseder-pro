@@ -1,0 +1,30 @@
+# syntax=docker/dockerfile:1.6
+
+FROM node:20-alpine AS base
+WORKDIR /app
+ENV NODE_ENV=production
+
+FROM base AS deps
+WORKDIR /app
+COPY package.json package-lock.json turbo.json tsconfig.json tsconfig.base.json ./
+COPY apps/web/package.json apps/web/package.json
+COPY apps/web/next.config.mjs apps/web/next.config.mjs
+COPY apps/web/components.json apps/web/components.json
+COPY packages/shared/package.json packages/shared/package.json
+RUN npm ci
+
+FROM deps AS build
+WORKDIR /app
+COPY . .
+RUN npm run build -- --filter=@wisender/web
+
+FROM base AS runtime
+WORKDIR /app/apps/web
+ENV NODE_ENV=production
+COPY --from=deps /app/node_modules ../../node_modules
+COPY --from=build /app/apps/web/.next ./.next
+COPY --from=build /app/apps/web/public ./public
+COPY --from=build /app/apps/web/package.json ./package.json
+COPY --from=build /app/apps/web/next.config.mjs ./next.config.mjs
+EXPOSE 3000
+CMD ["npx", "next", "start"]

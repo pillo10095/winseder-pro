@@ -1,0 +1,56 @@
+context: |
+  Wisender Pro is a monorepo project using TurboRepo with:
+  - Web app: Next.js 14.2.3, React 18.3.1, Tailwind CSS
+  - API: NestJS 10.3.0, TypeORM, MySQL2
+  - Shared packages: TypeScript utilities
+  - Package manager: npm@10.5.0
+  - Test runners: Jest (API), Turbo test (global)
+  - Linter: ESLint with Next.js and Prettier configs
+  - Formatter: Prettier
+  - Type checker: TypeScript 5.4.0
+
+strict_tdd: true
+
+testing:
+  test_runner:
+    command: turbo test
+    framework: TurboRepo (Jest for API)
+  test_layers:
+    unit:
+      available: true
+      tool: Jest
+    integration:
+      available: true
+      tool: NestJS Testing utilities
+    e2e:
+      available: false
+      tool: —
+  coverage:
+    available: true
+    command: turbo test -- --coverage
+  quality_tools:
+    linter:
+      available: true
+      command: turbo lint
+    type_checker:
+      available: true
+      command: tsc --noEmit
+    formatter:
+      available: true
+      command: prettier --write "**/*.{ts,tsx,js,jsx,json,md}"
+
+phase_rules:
+  proposal:
+    required: true
+  spec:
+    required: true
+  design:
+    required: true
+  tasks:
+    required: true
+  apply:
+    required: true
+  verify:
+    required: true
+  archive:
+    required: true

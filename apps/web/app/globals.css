@@ -1,0 +1,294 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════
+   Construtivismo Literário Experimental — Wisender Pro
+   Adaptación: B2B SaaS CRM con estética constructivista
+   ═══════════════════════════════════════════════════ */
+
+:root {
+  /* ─── Base ─── */
+  --background: 0 0% 100%;
+  --foreground: 0 0% 0%;
+
+  /* ─── Surface ─── */
+  --card: 0 0% 100%;
+  --card-foreground: 200 18% 20%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 200 18% 20%;
+
+  /* ─── Primary: Dark Red #8B0000 ─── */
+  --primary: 0 100% 27%;
+  --primary-foreground: 0 0% 100%;
+  --primary-muted: 0 100% 95%;
+
+  /* ─── Secondary: Ochre Yellow #CC7722 ─── */
+  --secondary: 30 71% 47%;
+  --secondary-foreground: 0 0% 100%;
+
+  /* ─── Accent: Dark Red (use for hover/reveal states) ─── */
+  --accent: 0 100% 27%;
+  --accent-foreground: 0 0% 100%;
+
+  /* ─── Muted: Lead Grey #36454F ─── */
+  --muted: 200 18% 26%;
+  --muted-foreground: 200 10% 50%;
+  --muted-light: 200 10% 92%;
+
+  /* ─── Semantic ─── */
+  --destructive: 25 100% 40%;
+  --destructive-foreground: 0 0% 100%;
+  --success: 82 60% 35%;
+  --success-foreground: 0 0% 100%;
+  --warning: 30 71% 47%;
+  --warning-foreground: 0 0% 100%;
+  --info: 180 100% 25%;
+  --info-foreground: 0 0% 100%;
+
+  /* ─── Borders / Inputs ─── */
+  --border: 0 0% 85%;
+  --input: 0 0% 90%;
+  --ring: 0 100% 27%;
+
+  /* ─── Radius (sharper — constructivist angularity) ─── */
+  --radius: 0.25rem;
+}
+
+.dark {
+  /* ─── Base ─── */
+  --background: 200 18% 8%;
+  --foreground: 0 0% 92%;
+
+  /* ─── Surface ─── */
+  --card: 200 18% 12%;
+  --card-foreground: 0 0% 88%;
+  --popover: 200 18% 12%;
+  --popover-foreground: 0 0% 88%;
+
+  /* ─── Primary: Dark Red (brighter for dark mode) ─── */
+  --primary: 0 100% 35%;
+  --primary-foreground: 0 0% 100%;
+  --primary-muted: 0 100% 10%;
+
+  /* ─── Secondary ─── */
+  --secondary: 30 71% 40%;
+  --secondary-foreground: 0 0% 100%;
+
+  /* ─── Accent ─── */
+  --accent: 0 100% 30%;
+  --accent-foreground: 0 0% 100%;
+
+  /* ─── Muted ─── */
+  --muted: 200 10% 18%;
+  --muted-foreground: 200 10% 55%;
+  --muted-light: 200 10% 18%;
+
+  /* ─── Semantic ─── */
+  --destructive: 25 100% 35%;
+  --destructive-foreground: 0 0% 100%;
+  --success: 82 60% 30%;
+  --success-foreground: 0 0% 100%;
+  --warning: 30 71% 40%;
+  --warning-foreground: 0 0% 100%;
+  --info: 180 100% 22%;
+  --info-foreground: 0 0% 100%;
+
+  /* ─── Borders / Inputs ─── */
+  --border: 200 10% 22%;
+  --input: 200 10% 22%;
+  --ring: 0 100% 35%;
+}
+
+/* ═══════════════════════════════════════════════════
+   Base Styles
+   ═══════════════════════════════════════════════════ */
+
+body {
+  @apply bg-background text-foreground antialiased;
+  font-feature-settings: "liga" 1, "kern" 1;
+}
+
+/* ═══════════════════════════════════════════════════
+   Constructivist Effects
+   ═══════════════════════════════════════════════════ */
+
+/* Geometric frame — accent border with skew */
+@layer components {
+  .geometric-frame {
+    @apply relative border-l-4 border-primary;
+    transform: skewX(-1deg);
+  }
+
+  .geometric-frame::before {
+    content: "";
+    @apply absolute -top-px right-0 h-px w-12 bg-primary;
+  }
+
+  .geometric-frame::after {
+    content: "";
+    @apply absolute -bottom-px right-0 h-px w-12 bg-primary;
+  }
+
+  /* Text collage overlay effect */
+  .text-collage {
+    @apply relative inline-block;
+  }
+
+  .text-collage::after {
+    content: attr(data-collage);
+    @apply absolute -top-1 left-1 text-primary/20;
+    transform: skewX(-2deg);
+  }
+
+  /* Geometric decorative block */
+  .geo-block {
+    @apply relative overflow-hidden;
+  }
+
+  .geo-block::before {
+    content: "";
+    @apply absolute -right-4 -top-4 size-24 border-2 border-primary/10 rotate-12;
+  }
+
+  .geo-block::after {
+    content: "";
+    @apply absolute -bottom-2 -left-2 size-16 bg-primary/5;
+    transform: skewX(-3deg);
+  }
+
+  /* Page-turn reveal animation */
+  .page-turn-effect {
+    @apply relative overflow-hidden;
+  }
+
+  .page-turn-effect::before {
+    content: "";
+    @apply absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-primary/10 to-transparent;
+    transform: translateX(-100%);
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .page-turn-effect:hover::before {
+    transform: translateX(0);
+  }
+
+  /* Constructivist divider — diagonal slash instead of straight line */
+  .divider-constructivist {
+    @apply relative h-px border-0;
+    background: linear-gradient(
+      90deg,
+      hsl(var(--primary)) 0%,
+      hsl(var(--primary) / 0.3) 50%,
+      transparent 100%
+    );
+  }
+
+  .divider-constructivist::before {
+    content: "//";
+    @apply absolute -top-3 right-4 text-xs font-bold tracking-widest text-primary/40;
+  }
+
+  /* Card with constructivist edge */
+  .card-constructivist {
+    @apply relative border border-border bg-card text-card-foreground;
+    box-shadow: 4px 4px 0px hsl(var(--primary) / 0.08);
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+  }
+
+  .card-constructivist:hover {
+    box-shadow: 6px 6px 0px hsl(var(--primary) / 0.15);
+    transform: translate(-1px, -1px);
+  }
+
+  /* Asymmetric grid helper */
+  .grid-asymmetric {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .grid-asymmetric {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   Utility Animations
+   ═══════════════════════════════════════════════════ */
+
+@keyframes text-reveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes geo-slide {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes page-turn {
+  0% {
+    clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+  }
+  100% {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+}
+
+@layer utilities {
+  .animate-text-reveal {
+    animation: text-reveal 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+
+  .animate-geo-slide {
+    animation: geo-slide 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+
+  .animate-page-turn {
+    animation: page-turn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   Selection
+   ═══════════════════════════════════════════════════ */
+
+::selection {
+  background-color: hsl(var(--primary) / 0.2);
+  color: hsl(var(--primary));
+}
+
+/* ═══════════════════════════════════════════════════
+   Scrollbar (Webkit)
+   ═══════════════════════════════════════════════════ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
