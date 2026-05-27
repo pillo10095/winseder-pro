@@ -18,6 +18,11 @@ describe('Database Migrations', () => {
     '011-alter-conversations-add-assignment.ts',
     '012-create-conversation-notes.ts',
     '013-create-webhook-configs.ts',
+    '014-create-pipeline-stages.ts',
+    '015-create-deals.ts',
+    '016-create-activities.ts',
+    '017-create-contacts.ts',
+    '018-add-default-probability-to-pipeline-stages.ts',
   ];
 
   describe.each(expectedMigrations)('%s', (filename) => {

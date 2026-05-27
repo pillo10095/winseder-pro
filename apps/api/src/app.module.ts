@@ -20,6 +20,7 @@ import { MediaModule } from './modules/media/media.module';
 import { ChatbotModule } from './modules/chatbot/chatbot.module';
 import { InboxModule } from './modules/inbox/inbox.module';
 import { WebhooksModule } from './modules/webhooks/webhooks.module';
+import { CrmModule } from './modules/crm/crm.module';
 
 /**
  * AppModule centraliza la infraestructura transversal del backend.
@@ -57,7 +58,8 @@ import { WebhooksModule } from './modules/webhooks/webhooks.module';
     MediaModule,
     ChatbotModule,
     InboxModule,
-    WebhooksModule
+    WebhooksModule,
+    CrmModule
   ]
 })
 export class AppModule implements NestModule {
