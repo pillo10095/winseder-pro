@@ -3,11 +3,13 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useContacts } from '@/src/hooks/use-contacts';
+import { ContactForm } from '@/src/components/crm/contact-form';
 import { Plus, Search } from 'lucide-react';
 
 export default function ContactsPage() {
-  const { contacts, total, loading, error, fetchContacts } = useContacts();
+  const { contacts, total, loading, error, fetchContacts, createContact } = useContacts();
   const [search, setSearch] = useState('');
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     fetchContacts('current', search);
@@ -22,7 +24,10 @@ export default function ContactsPage() {
             {loading ? 'Loading...' : `${total} contact${total !== 1 ? 's' : ''}`}
           </p>
         </div>
-        <button className="flex items-center gap-2 rounded-sm bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:brightness-110 transition-all">
+        <button
+          onClick={() => setShowForm(true)}
+          className="flex items-center gap-2 rounded-sm bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:brightness-110 transition-all"
+        >
           <Plus className="h-4 w-4" />
           Add Contact
         </button>
@@ -82,6 +87,16 @@ export default function ContactsPage() {
           </tbody>
         </table>
       </div>
+
+      {showForm && (
+        <ContactForm
+          onClose={() => setShowForm(false)}
+          onSave={async (data) => {
+            await createContact('current', data);
+            setShowForm(false);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { useContacts } from '@/src/hooks/use-contacts';
@@ -8,14 +8,15 @@ import { useDeals } from '@/src/hooks/use-deals';
 import { useActivities } from '@/src/hooks/use-activities';
 import { ActivityForm } from '@/src/components/crm/activity-form';
 import { ActivityTimeline } from '@/src/components/crm/activity-timeline';
-import { useState } from 'react';
+import { ContactForm } from '@/src/components/crm/contact-form';
 import { ArrowLeft } from 'lucide-react';
 
 export default function ContactDetailPage({ params }: { params: { id: string } }) {
-  const { current, currentLoading, fetchContactById } = useContacts();
+  const { current, currentLoading, fetchContactById, updateContact } = useContacts();
   const { deals, fetchDeals } = useDeals();
   const { activities, fetchActivities, createActivity } = useActivities();
   const [showActivityForm, setShowActivityForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
 
   useEffect(() => {
     fetchContactById(params.id);
@@ -64,7 +65,10 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
               {[current!.role, current!.company_name].filter(Boolean).join(' at ') || '—'}
             </p>
           </div>
-          <button className="rounded-sm border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted-light hover:text-foreground transition-colors">
+          <button
+            onClick={() => setShowEditForm(true)}
+            className="rounded-sm border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted-light hover:text-foreground transition-colors"
+          >
             Edit
           </button>
         </div>
@@ -143,6 +147,25 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
         <ActivityForm
           onClose={() => setShowActivityForm(false)}
           onSave={handleLogActivity}
+        />
+      )}
+
+      {showEditForm && current && (
+        <ContactForm
+          initial={{
+            name: current.name,
+            email: current.email || '',
+            phone: current.phone || '',
+            company_name: current.company_name || '',
+            role: current.role || '',
+            source: current.source || '',
+            notes: current.notes || '',
+          }}
+          onClose={() => setShowEditForm(false)}
+          onSave={async (data) => {
+            await updateContact(current.id, data);
+            setShowEditForm(false);
+          }}
         />
       )}
     </div>

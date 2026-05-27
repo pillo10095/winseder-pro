@@ -83,9 +83,26 @@ export function useContacts() {
     [],
   );
 
+  const updateContact = useCallback(
+    async (id: string, dto: Partial<Contact>) => {
+      const res = await fetchWithAuth(`${API_URL}/crm/contacts/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dto),
+      });
+
+      if (!res.ok) throw new Error('Failed to update contact');
+      const updated = await res.json();
+      setCurrent(updated);
+      setContacts((prev) => prev.map((c) => (c.id === id ? { ...c, ...updated } : c)));
+      return updated;
+    },
+    [],
+  );
+
   return {
     contacts, total, loading, error,
     current, currentLoading,
-    fetchContacts, fetchContactById, createContact,
+    fetchContacts, fetchContactById, createContact, updateContact,
   };
 }
