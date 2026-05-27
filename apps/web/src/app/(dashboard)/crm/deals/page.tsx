@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useDeals } from '@/src/hooks/use-deals';
+import { usePipeline } from '@/src/hooks/use-pipeline';
+import { DealForm } from '@/src/components/crm/deal-form';
+import { fetchWithAuth, API_URL } from '@/src/lib/api';
 import { Search } from 'lucide-react';
 
 const STAGE_NAMES: Record<string, string> = {
@@ -16,11 +19,14 @@ const STAGE_NAMES: Record<string, string> = {
 
 export default function DealsPage() {
   const { deals, total, loading, error, fetchDeals } = useDeals();
+  const { stages, fetchStages } = usePipeline();
   const [search, setSearch] = useState('');
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     fetchDeals('current', undefined, undefined, search);
-  }, [fetchDeals, search]);
+    fetchStages();
+  }, [fetchDeals, fetchStages, search]);
 
   const filtered = deals.filter(
     (d) =>
@@ -39,7 +45,10 @@ export default function DealsPage() {
               : `${filtered.length} deals · $${filtered.reduce((s, d) => s + d.value, 0).toLocaleString()} total`}
           </p>
         </div>
-        <button className="rounded-sm bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:brightness-110 transition-all">
+        <button
+          onClick={() => setShowForm(true)}
+          className="rounded-sm bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:brightness-110 transition-all"
+        >
           + Add Deal
         </button>
       </div>
@@ -110,6 +119,22 @@ export default function DealsPage() {
           </tbody>
         </table>
       </div>
+
+      {showForm && (
+        <DealForm
+          stages={stages}
+          onClose={() => setShowForm(false)}
+          onSave={async (data) => {
+            await fetchWithAuth(`${API_URL}/crm/deals`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data),
+            });
+            setShowForm(false);
+            fetchDeals('current');
+          }}
+        />
+      )}
     </div>
   );
 }
