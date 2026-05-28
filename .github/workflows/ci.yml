@@ -15,10 +15,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Use Node.js 20
+      - name: Use Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: "npm"
 
       - name: Install dependencies
@@ -30,26 +30,5 @@ jobs:
       - name: Tests
         run: npm run test -- --filter=@wisender/api
 
-      - name: Build API (debug)
-        if: always()
-        working-directory: ./apps/api
-        run: |
-          echo "=== current directory ==="
-          pwd
-          echo "=== node version ==="
-          node --version
-          echo "=== npm version ==="
-          npm --version
-          echo "=== check nest availability ==="
-          npx --yes nest --version 2>&1 || echo "nest not available"
-          echo "=== nest build start ==="
-          set +e
-          npx nest build 2>&1
-          EXIT_CODE=$?
-          set -e
-          echo "=== nest build exit code: $EXIT_CODE ==="
-          echo "=== dist folder ==="
-          ls -la dist/ 2>/dev/null || echo "dist not created"
-          echo "=== tsconfig check ==="
-          cat tsconfig.build.json 2>/dev/null || echo "no tsconfig.build.json"
-          cat tsconfig.json 2>/dev/null || echo "no tsconfig.json"
+      - name: Build
+        run: npx turbo build --force 2>&1
