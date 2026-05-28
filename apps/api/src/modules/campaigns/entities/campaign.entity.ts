@@ -26,7 +26,7 @@ export class Campaign {
   @Column({ length: 200 })
   name!: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   template_id!: string | null;
 
   @ManyToOne(() => Template, { nullable: true })

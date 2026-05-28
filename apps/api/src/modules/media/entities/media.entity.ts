@@ -29,7 +29,7 @@ export class Media {
   @JoinColumn({ name: 'session_id' })
   session!: Session;
 
-  @Column({ length: 500, nullable: true })
+  @Column({ length: 500, nullable: true, type: 'varchar' })
   original_url!: string | null;
 
   @Column({ length: 500 })
@@ -41,13 +41,13 @@ export class Media {
   @Column()
   file_size!: number;
 
-  @Column({ length: 500, nullable: true })
+  @Column({ length: 500, nullable: true, type: 'varchar' })
   thumbnail_key!: string | null;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'int' })
   width!: number | null;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'int' })
   height!: number | null;
 
   @CreateDateColumn()

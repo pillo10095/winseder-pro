@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { AuthModule } from '../auth/auth.module';
 import { AiAgentController } from './controllers/ai-agent.controller';
 import { AiTrainingController } from './controllers/ai-training.controller';
 import { AiAgent } from './entities/ai-agent.entity';
@@ -19,7 +20,7 @@ import { SuggestionService } from './services/suggestion.service';
 import { WebhooksModule } from '../webhooks/webhooks.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([AiAgent, AiLog, AiTrainingDoc]), WebhooksModule],
+  imports: [AuthModule, TypeOrmModule.forFeature([AiAgent, AiLog, AiTrainingDoc]), WebhooksModule],
   controllers: [AiAgentController, AiTrainingController],
   providers: [
     AiAgentRepository,

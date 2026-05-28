@@ -58,7 +58,7 @@ export class Message {
   @Column({ type: 'text', nullable: true })
   content!: string | null;
 
-  @Column({ length: 500, nullable: true })
+  @Column({ length: 500, nullable: true, type: 'varchar' })
   media_url!: string | null;
 
   @Column()

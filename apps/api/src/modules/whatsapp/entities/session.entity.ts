@@ -38,7 +38,7 @@ export class Session {
   @Column({ type: 'enum', enum: SessionStatus, default: SessionStatus.DISCONNECTED })
   status!: SessionStatus;
 
-  @Column({ length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 20, nullable: true })
   phone_number!: string | null;
 
   @Column({ type: 'text', nullable: true })

@@ -34,7 +34,7 @@ export class Conversation {
   @Column({ length: 100 })
   contact_jid!: string;
 
-  @Column({ length: 255, nullable: true })
+  @Column({ length: 255, nullable: true, type: 'varchar' })
   contact_name!: string | null;
 
   @Column({ type: 'datetime', nullable: true })
@@ -43,7 +43,7 @@ export class Conversation {
   @Column({ default: 0 })
   unread_count!: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   assigned_to!: string | null;
 
   @ManyToOne(() => User, { nullable: true })

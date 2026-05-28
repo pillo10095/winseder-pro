@@ -31,10 +31,10 @@ export class AiAgent {
   @Column({ length: 100, default: 'gpt-4o-mini' })
   model!: string;
 
-  @Column({ length: 255, nullable: true })
+  @Column({ length: 255, nullable: true, type: 'varchar' })
   api_key!: string | null;
 
-  @Column({ length: 255, nullable: true })
+  @Column({ length: 255, nullable: true, type: 'varchar' })
   base_url!: string | null;
 
   @Column({ type: 'text', nullable: true })

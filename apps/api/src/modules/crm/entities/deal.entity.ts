@@ -32,7 +32,7 @@ export class Deal {
   @JoinColumn({ name: 'pipeline_stage_id' })
   pipeline_stage!: PipelineStage;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   contact_id!: string | null;
 
   @ManyToOne(() => Contact, { nullable: true })
@@ -45,7 +45,7 @@ export class Deal {
   @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
   value!: number;
 
-  @Column({ length: 200, nullable: true })
+  @Column({ length: 200, nullable: true, type: 'varchar' })
   company_name!: string | null;
 
   @Column({ default: 0 })
@@ -54,7 +54,7 @@ export class Deal {
   @Column({ type: 'datetime', nullable: true })
   close_date!: Date | null;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   assigned_to!: string | null;
 
   @ManyToOne(() => User, { nullable: true })

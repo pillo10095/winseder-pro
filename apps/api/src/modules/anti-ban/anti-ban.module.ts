@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { AuthModule } from '../auth/auth.module';
 import { Session } from '../whatsapp/entities/session.entity';
 import { SessionRepository } from '../whatsapp/repositories/session.repository';
 
@@ -17,7 +18,7 @@ import { ProxyRotatorService } from './services/proxy-rotator.service';
 import { HealthMonitorService } from './services/health-monitor.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Session])],
+  imports: [AuthModule, TypeOrmModule.forFeature([Session])],
   controllers: [AntiBanController],
   providers: [
     SessionRepository,

@@ -25,19 +25,19 @@ export class Contact {
   @Column({ length: 200 })
   name!: string;
 
-  @Column({ length: 255, nullable: true })
+  @Column({ length: 255, nullable: true, type: 'varchar' })
   email!: string | null;
 
-  @Column({ length: 50, nullable: true })
+  @Column({ length: 50, nullable: true, type: 'varchar' })
   phone!: string | null;
 
-  @Column({ length: 200, nullable: true })
+  @Column({ length: 200, nullable: true, type: 'varchar' })
   company_name!: string | null;
 
-  @Column({ length: 100, nullable: true })
+  @Column({ length: 100, nullable: true, type: 'varchar' })
   source!: string | null;
 
-  @Column({ length: 100, nullable: true })
+  @Column({ length: 100, nullable: true, type: 'varchar' })
   role!: string | null;
 
   @Column({ type: 'text', nullable: true })

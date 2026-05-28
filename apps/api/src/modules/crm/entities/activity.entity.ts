@@ -32,14 +32,14 @@ export class Activity {
   @JoinColumn({ name: 'company_id' })
   company!: Company;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   contact_id!: string | null;
 
   @ManyToOne(() => Contact, { nullable: true })
   @JoinColumn({ name: 'contact_id' })
   contact!: Contact | null;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   deal_id!: string | null;
 
   @ManyToOne(() => Deal, { nullable: true })

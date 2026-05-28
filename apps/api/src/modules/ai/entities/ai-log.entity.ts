@@ -22,7 +22,7 @@ export class AiLog {
   @JoinColumn({ name: 'company_id' })
   company!: Company;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   agent_id!: string | null;
 
   @ManyToOne(() => AiAgent, { nullable: true })

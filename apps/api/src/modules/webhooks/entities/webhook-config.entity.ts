@@ -31,7 +31,7 @@ export class WebhookConfig {
   @Column({ default: true })
   is_active!: boolean;
 
-  @Column({ length: 100, nullable: true })
+  @Column({ length: 100, nullable: true, type: 'varchar' })
   secret!: string | null;
 
   @CreateDateColumn()
