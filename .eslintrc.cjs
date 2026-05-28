@@ -19,5 +19,8 @@ module.exports = {
       version: 'detect'
     }
   },
+  rules: {
+    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+  },
   ignorePatterns: ['node_modules', 'dist', '.turbo']
 };

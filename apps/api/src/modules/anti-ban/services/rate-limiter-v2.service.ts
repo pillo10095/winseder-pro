@@ -238,7 +238,7 @@ export class RateLimiterV2Service {
     const now = Date.now();
 
     const typeStats: Record<string, { lastMinute: number; lastHour: number; lastDay: number }> =
-      {} as any;
+      {} as Record<string, { lastMinute: number; lastHour: number; lastDay: number }>;
 
     for (const [type, entry] of Object.entries(state.entries)) {
       this.pruneEntries(entry, now);

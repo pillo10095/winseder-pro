@@ -82,7 +82,7 @@ export class AiActionService {
       response: JSON.stringify(result),
       tokens_used: 0,
       duration_ms: 0,
-    } as any);
+    } as Record<string, unknown>);
 
     this.logger.debug(`Classified intent: ${result.intent} (${result.confidence})`);
     return true;
@@ -94,7 +94,7 @@ export class AiActionService {
     remoteJid: string,
     content: string,
   ): Promise<boolean> {
-    const result = await this.hotLead.detect(companyId, content, {
+    await this.hotLead.detect(companyId, content, {
       sessionId,
       conversationId: remoteJid,
     });

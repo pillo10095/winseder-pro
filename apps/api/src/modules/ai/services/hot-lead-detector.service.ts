@@ -42,7 +42,7 @@ export class HotLeadDetectorService {
       response: JSON.stringify(result),
       tokens_used: 0,
       duration_ms: Date.now() - start,
-    } as any);
+    } as Record<string, unknown>);
 
     if (result.isHot) {
       this.eventEmitter.emit(AI_EVENTS.HOT_LEAD_DETECTED, {

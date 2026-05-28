@@ -149,7 +149,7 @@ export class SuperAdminService {
     companyId?: string;
     role?: UserRole;
   }) {
-    const where: any = {};
+    const where: Partial<Record<string, unknown>> = {};
     if (options.companyId) where.company_id = options.companyId;
     if (options.role) where.role = options.role;
 

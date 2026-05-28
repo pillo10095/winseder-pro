@@ -16,7 +16,6 @@ import { HotLeadDetectorService } from './services/hot-lead-detector.service';
 import { IntentClassifierService } from './services/intent-classifier.service';
 import { RagService } from './services/rag.service';
 import { SuggestionService } from './services/suggestion.service';
-import { AiEventListenerService } from './services/ai-event-listener.service';
 import { WebhooksModule } from '../webhooks/webhooks.module';
 
 @Module({

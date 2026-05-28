@@ -37,7 +37,7 @@ export class AntiBanController {
   /* ───── Health ───── */
 
   @Get('health')
-  async getHealthOverview(@Req() req: Request) {
+  async getHealthOverview() {
     const aggregate = this.healthMonitor.getAggregateHealth();
     const pausedSessions = this.autoPause.getAllPaused();
     return {
@@ -57,7 +57,6 @@ export class AntiBanController {
   @Get('health/:sessionId')
   async getSessionHealth(
     @Param('sessionId') sessionId: string,
-    @Req() req: Request,
   ) {
     const stats = this.healthMonitor.getSessionStats(sessionId);
     if (!stats) return { error: 'Session not registered' };
@@ -118,12 +117,12 @@ export class AntiBanController {
       autoPause?: Record<string, unknown>;
     },
   ) {
-    if (body.rateLimiter) this.rateLimiter.setConfig(sessionId, body.rateLimiter as any);
-    if (body.adaptiveDelay) this.adaptiveDelay.setConfig(sessionId, body.adaptiveDelay as any);
-    if (body.quietHours) this.quietHours.setConfig(sessionId, body.quietHours as any);
-    if (body.dailyBudget) this.dailyBudget.setConfig(sessionId, body.dailyBudget as any);
-    if (body.reportDetector) this.reportDetector.setConfig(sessionId, body.reportDetector as any);
-    if (body.autoPause) this.autoPause.setConfig(sessionId, body.autoPause as any);
+    if (body.rateLimiter) this.rateLimiter.setConfig(sessionId, body.rateLimiter as Record<string, unknown>);
+    if (body.adaptiveDelay) this.adaptiveDelay.setConfig(sessionId, body.adaptiveDelay as Record<string, unknown>);
+    if (body.quietHours) this.quietHours.setConfig(sessionId, body.quietHours as Record<string, unknown>);
+    if (body.dailyBudget) this.dailyBudget.setConfig(sessionId, body.dailyBudget as Record<string, unknown>);
+    if (body.reportDetector) this.reportDetector.setConfig(sessionId, body.reportDetector as Record<string, unknown>);
+    if (body.autoPause) this.autoPause.setConfig(sessionId, body.autoPause as Record<string, unknown>);
 
     return { data: { updated: true } };
   }

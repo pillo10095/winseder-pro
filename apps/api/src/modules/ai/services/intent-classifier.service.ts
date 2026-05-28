@@ -40,7 +40,7 @@ export class IntentClassifierService {
       response: JSON.stringify(result),
       tokens_used: 0,
       duration_ms: Date.now() - start,
-    } as any);
+    } as Record<string, unknown>);
 
     return { intent: result.label, confidence: result.confidence };
   }

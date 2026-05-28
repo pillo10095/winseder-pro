@@ -3,7 +3,6 @@ import { OnEvent } from '@nestjs/event-emitter';
 
 import { AI_EVENTS, HotLeadEventPayload } from '../ai.events';
 import { WebhookConfigRepository } from '../../webhooks/repositories/webhook-config.repository';
-import { IntentClassifierService } from './intent-classifier.service';
 
 @Injectable()
 export class AiEventListenerService {

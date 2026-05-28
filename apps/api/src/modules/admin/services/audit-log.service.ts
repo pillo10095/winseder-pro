@@ -36,7 +36,7 @@ export class AuditLogService {
       target_id: entry.targetId,
       target_type: entry.targetType,
       description: entry.description,
-      metadata: entry.metadata as Record<string, any> | undefined,
+      metadata: entry.metadata as Record<string, unknown> | undefined,
       ip_address: entry.ipAddress,
     });
 
@@ -49,7 +49,7 @@ export class AuditLogService {
     companyId: string,
     options: { limit?: number; offset?: number; action?: string } = {},
   ) {
-    const where: any = { company_id: companyId };
+    const where: Partial<Record<string, unknown>> = { company_id: companyId };
     if (options.action) where.action = options.action;
 
     const [items, total] = await this.auditRepo.findAndCount({
@@ -69,7 +69,7 @@ export class AuditLogService {
     companyId?: string;
     actorId?: string;
   } = {}) {
-    const where: any = {};
+    const where: Partial<Record<string, unknown>> = {};
     if (options.action) where.action = options.action;
     if (options.companyId) where.company_id = options.companyId;
     if (options.actorId) where.actor_id = options.actorId;

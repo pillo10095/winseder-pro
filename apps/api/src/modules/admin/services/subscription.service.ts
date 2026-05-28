@@ -112,7 +112,7 @@ export class SubscriptionService {
     status?: SubscriptionStatus;
     companyId?: string;
   }) {
-    const where: any = {};
+    const where: Partial<Record<string, unknown>> = {};
     if (options.status) where.status = options.status;
     if (options.companyId) where.company_id = options.companyId;
 

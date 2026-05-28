@@ -64,7 +64,7 @@ export class RagService {
       response: answer,
       tokens_used: 0,
       duration_ms: Date.now() - start,
-    } as any);
+    } as Record<string, unknown>);
 
     return { answer };
   }

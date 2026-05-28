@@ -48,7 +48,7 @@ export class SuggestionService {
       response: JSON.stringify(suggestions),
       tokens_used: 0,
       duration_ms: Date.now() - start,
-    } as any);
+    } as Record<string, unknown>);
 
     return { suggestions };
   }

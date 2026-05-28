@@ -77,7 +77,7 @@ export class AiAgentService {
       response: response.content,
       tokens_used: response.tokensUsed,
       duration_ms: response.durationMs,
-    } as any);
+    } as Record<string, unknown>);
 
     return { reply: response.content };
   }

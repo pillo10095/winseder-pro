@@ -12,6 +12,7 @@ import {
 import { Request } from 'express';
 
 import { UserRole } from '../../auth/entities/user.entity';
+import { SubscriptionStatus } from '../../tenancy/entities/subscription.entity';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
@@ -69,7 +70,7 @@ export class BillingController {
     const result = await this.subscriptionService.listSubscriptions({
       limit: limit ? parseInt(limit, 10) : undefined,
       offset: offset ? parseInt(offset, 10) : undefined,
-      status: status as any,
+      status: status as SubscriptionStatus,
       companyId,
     });
     return { data: result };

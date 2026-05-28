@@ -99,7 +99,6 @@ export class QuietHoursService {
     if (config.ranges.length === 0) return null;
 
     const now = this.getNowInTimezone(config.timezone);
-    const currentMinutes = now.getHours() * 60 + now.getMinutes();
     const currentDay = now.getDay();
 
     let bestCandidate: Date | null = null;
@@ -108,16 +107,13 @@ export class QuietHoursService {
     for (const range of config.ranges) {
       const timeStr = edge === 'start' ? range.start : range.end;
       const parts = timeStr.split(':').map(Number);
-      const targetMinutes = parts[0] * 60 + parts[1];
-
       const daysToCheck = range.daysOfWeek ?? [0, 1, 2, 3, 4, 5, 6];
 
       for (const dayOffset of [0, 1, 2, 3, 4, 5, 6]) {
         const checkDay = (currentDay + dayOffset) % 7;
         if (!daysToCheck.includes(checkDay)) continue;
 
-        let candidateMinutes = targetMinutes;
-        let candidateDate = new Date(now);
+        const candidateDate = new Date(now);
         candidateDate.setDate(candidateDate.getDate() + dayOffset);
         candidateDate.setHours(parts[0], parts[1], 0, 0);
 
