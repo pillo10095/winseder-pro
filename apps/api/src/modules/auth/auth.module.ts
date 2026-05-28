@@ -23,7 +23,7 @@ import { Subscription } from '../tenancy/entities/subscription.entity';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         secret: config.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: config.get('JWT_EXPIRATION', '15m') as `${number}${'s' | 'm' | 'h' | 'd'}` },
+        signOptions: { expiresIn: config.get('JWT_EXPIRATION', '24h') as `${number}${'s' | 'm' | 'h' | 'd'}` },
       }),
     }),
   ],

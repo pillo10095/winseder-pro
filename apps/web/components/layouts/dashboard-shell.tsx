@@ -3,6 +3,8 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { DateTime } from "@/components/shared/date-time";
+import { SidebarLogout } from "@/components/shared/sidebar-logout";
 import { UserMenu } from "@/src/components/layout/user-menu";
 
 type SidebarItem = {
@@ -18,6 +20,7 @@ export interface DashboardShellProps {
 
 const defaultSidebarItems: SidebarItem[] = [
   { label: "Panel", href: "/", isActive: true },
+  { label: "WhatsApp", href: "/whatsapp" },
   { label: "Campañas", href: "/campaigns" },
   { label: "Contactos", href: "/contacts" },
   { label: "Automatizaciones", href: "/automations" },
@@ -62,16 +65,20 @@ export function DashboardShell({ sidebar, children }: DashboardShellProps) {
           ))}
         </nav>
 
-        {/* Constructivist decorative element */}
+        {/* Footer — date/time + logout */}
         <div className="mt-auto border-t border-border/50 p-4">
           <div className="geo-block rounded-sm bg-muted-light/50 p-3 dark:bg-muted/20">
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               Wisender Pro
             </p>
-            <p className="mt-1 text-[10px] leading-tight text-muted-foreground/60">
-              v0.1 · Construtivismo
-            </p>
+            <div className="mt-1">
+              <DateTime />
+            </div>
           </div>
+
+          <Separator className="my-3" />
+
+          <SidebarLogout />
         </div>
       </aside>
 

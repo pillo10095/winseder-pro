@@ -11,6 +11,8 @@ import { SessionStatus } from '../entities/session.entity';
 import { SessionRepository } from '../repositories/session.repository';
 import { BaileysAuthService } from './baileys-auth.service';
 import { BaileysReconnectService } from './baileys-reconnect.service';
+import { QrService } from './qr.service';
+import { QrEventsService } from './qr-events.service';
 
 export interface BaileysSession {
   socket: WASocket;
@@ -25,6 +27,9 @@ export class BaileysClientService implements OnApplicationShutdown {
   /** Active Baileys sockets keyed by session ID */
   private readonly sockets = new Map<string, BaileysSession>();
 
+  /** Sessions manually disconnected — prevents reconnect on clean socket end */
+  private readonly manualDisconnect = new Set<string>();
+
   /** Shared message retry cache (prevents infinite retry loops across restarts) */
   private readonly msgRetryCache = new NodeCache();
 
@@ -32,6 +37,8 @@ export class BaileysClientService implements OnApplicationShutdown {
     private readonly sessionRepository: SessionRepository,
     private readonly authService: BaileysAuthService,
     private readonly reconnectService: BaileysReconnectService,
+    private readonly qrService: QrService,
+    private readonly qrEvents: QrEventsService,
   ) {}
 
   /**
@@ -45,8 +52,15 @@ export class BaileysClientService implements OnApplicationShutdown {
           const update = events['connection.update'];
           const { connection, lastDisconnect, qr } = update;
 
+          this.logger.debug(
+            `Connection update for ${sessionId}: connection=${connection}, hasQr=${!!qr}, hasError=${!!lastDisconnect?.error}`,
+            lastDisconnect?.error?.message,
+          );
+
           if (qr) {
-            this.logger.debug(`QR received for session ${sessionId}`);
+            this.logger.log(`QR received for session ${sessionId}`);
+            const qrDataUrl = await this.qrService.generateQrDataUrl(qr);
+            this.qrEvents.emitQrGenerated(sessionId, companyId, qrDataUrl);
             await this.sessionRepository.update(sessionId, {
               status: SessionStatus.QR_CODE,
             });
@@ -67,6 +81,18 @@ export class BaileysClientService implements OnApplicationShutdown {
           }
 
           if (connection === 'close') {
+            // If manually disconnected, skip reconnect entirely
+            if (this.manualDisconnect.has(sessionId)) {
+              this.logger.log(`Session ${sessionId} manually disconnected — not reconnecting`);
+              this.manualDisconnect.delete(sessionId);
+              await this.sessionRepository.update(sessionId, {
+                status: SessionStatus.DISCONNECTED,
+                auth_state: null,
+              });
+              this.sockets.delete(sessionId);
+              return;
+            }
+
             const { shouldReconnect, reason } = this.reconnectService.evaluateDisconnect(
               sessionId,
               lastDisconnect,
@@ -75,6 +101,7 @@ export class BaileysClientService implements OnApplicationShutdown {
             this.logger.warn(`Session ${sessionId} closed: ${reason}`);
 
             if (shouldReconnect) {
+              this.logger.log(`Reconnecting session ${sessionId}...`);
               await this.sessionRepository.update(sessionId, {
                 status: SessionStatus.CONNECTING,
               });
@@ -82,6 +109,7 @@ export class BaileysClientService implements OnApplicationShutdown {
                 await this.createSocket(sessionId, companyId);
               });
             } else {
+              this.logger.error(`Session ${sessionId} expired (won't reconnect): ${reason}`);
               await this.sessionRepository.update(sessionId, {
                 status: SessionStatus.EXPIRED,
               });
@@ -165,6 +193,7 @@ export class BaileysClientService implements OnApplicationShutdown {
    */
   async endSocket(sessionId: string): Promise<void> {
     this.reconnectService.clearRetries(sessionId);
+    this.manualDisconnect.add(sessionId);
     const entry = this.sockets.get(sessionId);
     if (entry?.socket) {
       try {

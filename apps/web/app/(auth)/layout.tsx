@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { DateTime } from "@/components/shared/date-time";
+
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-background p-4">
@@ -15,7 +17,12 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
             Plataforma omnicanal para tu equipo
           </p>
         </div>
+
         {children}
+
+        <div className="mt-8 border-t border-border/40 pt-6 text-center">
+          <DateTime />
+        </div>
       </div>
     </div>
   );

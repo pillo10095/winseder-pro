@@ -9,6 +9,7 @@ export const QR_EVENTS = {
 
 export interface QrGeneratedEvent {
   sessionId: string;
+  companyId: string;
   qrDataUrl: string;
   expiresAt: Date;
 }
@@ -21,9 +22,10 @@ export interface QrScannedEvent {
 export class QrEventsService {
   constructor(private readonly eventEmitter: EventEmitter2) {}
 
-  emitQrGenerated(sessionId: string, qrDataUrl: string): void {
+  emitQrGenerated(sessionId: string, companyId: string, qrDataUrl: string): void {
     this.eventEmitter.emit(QR_EVENTS.CODE_GENERATED, {
       sessionId,
+      companyId,
       qrDataUrl,
       expiresAt: new Date(Date.now() + 60_000), // QR valid for 60s
     } satisfies QrGeneratedEvent);

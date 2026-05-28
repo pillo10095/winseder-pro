@@ -68,21 +68,26 @@ export class AntiBanFingerprint {
     };
   }
 
+  private pickDifferent<T>(pool: T[], current: T): T {
+    const available = pool.filter(item => item !== current);
+    return available[Math.floor(Math.random() * available.length)];
+  }
+
   private maybeRotate(sessionId: string, state: typeof this.configs extends Map<string, infer T> ? T : never): void {
     const now = Date.now();
     if (now - state.lastRotation >= state.rotationInterval) {
-      state.currentUa = this.userAgents[Math.floor(Math.random() * this.userAgents.length)];
-      state.currentAuthMethod = this.authMethods[Math.floor(Math.random() * this.authMethods.length)];
+      state.currentUa = this.pickDifferent(this.userAgents, state.currentUa);
+      state.currentAuthMethod = this.pickDifferent(this.authMethods, state.currentAuthMethod);
       state.lastRotation = now;
       this.configs.set(sessionId, { ...state });
     }
   }
 
-  /** Force immediate rotation */
+  /** Force immediate rotation — always picks a different UA and auth method */
   forceRotate(sessionId: string) {
     const state = this.getOrCreateState(sessionId);
-    state.currentUa = this.userAgents[Math.floor(Math.random() * this.userAgents.length)];
-    state.currentAuthMethod = this.authMethods[Math.floor(Math.random() * this.authMethods.length)];
+    state.currentUa = this.pickDifferent(this.userAgents, state.currentUa);
+    state.currentAuthMethod = this.pickDifferent(this.authMethods, state.currentAuthMethod);
     state.lastRotation = Date.now();
     this.configs.set(sessionId, { ...state });
   }

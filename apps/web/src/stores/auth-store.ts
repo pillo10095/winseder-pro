@@ -6,6 +6,7 @@ function getLocalStorage() {
 import { create } from "zustand";
 
 import * as api from "@/src/lib/api";
+import { setAuthToken } from "@/src/lib/api";
 
 export interface User {
   id: string;
@@ -49,6 +50,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const refreshToken = ls.getItem("refresh_token");
     const userStr = ls.getItem("user");
 
+    // Sync into module-level token for fetchWithAuth
+    if (token) setAuthToken(token, refreshToken);
+
     let user: User | null = null;
     try {
       if (userStr) user = JSON.parse(userStr) as User;
@@ -67,6 +71,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   login: async (email: string, password: string) => {
     const res = await api.login(email, password);
+    setAuthToken(res.access_token, res.refresh_token);
     const ls = getLocalStorage();
     ls?.setItem("token", res.access_token);
     ls?.setItem("refresh_token", res.refresh_token);
@@ -82,6 +87,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   register: async (name: string, email: string, password: string) => {
     const res = await api.register(name, email, password);
+    setAuthToken(res.access_token, res.refresh_token);
     const ls = getLocalStorage();
     ls?.setItem("token", res.access_token);
     ls?.setItem("refresh_token", res.refresh_token);
@@ -105,6 +111,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Ignore errors — clear state regardless
     }
 
+    setAuthToken(null);
     const ls = getLocalStorage();
     ls?.removeItem("token");
     ls?.removeItem("refresh_token");

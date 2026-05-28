@@ -40,6 +40,9 @@ export class JwtAuthGuard implements CanActivate {
       companyId: payload.companyId,
     };
 
+    // Set companyId directly on request for controllers that use it
+    request.companyId = payload.companyId;
+
     return true;
   }
 

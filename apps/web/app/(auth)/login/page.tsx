@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Greeting } from "@/components/shared/date-time";
 import { useAuthStore } from "@/src/stores/auth-store";
 
 function setSessionCookie(token: string) {
@@ -41,7 +42,8 @@ export default function LoginPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h2 className="font-sans text-xl font-bold">Iniciar sesión</h2>
+        <Greeting />
+        <h2 className="mt-2 font-sans text-xl font-bold">Iniciar sesión</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Ingresa tus credenciales para continuar
         </p>

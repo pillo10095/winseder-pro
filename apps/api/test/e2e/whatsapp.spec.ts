@@ -1,6 +1,7 @@
 jest.mock('@whiskeysockets/baileys', () => ({}));
 
 import { Test, type TestingModule } from '@nestjs/testing';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 
@@ -12,6 +13,7 @@ import { QrService } from '@/modules/whatsapp/services/qr.service';
 import { MessageHandlerService } from '@/modules/whatsapp/services/message-handler.service';
 import { MessageRelayService } from '@/modules/whatsapp/services/message-relay.service';
 import { SessionRepository } from '@/modules/whatsapp/repositories/session.repository';
+import { WhatsAppGateway } from '@/modules/whatsapp/gateways/whatsapp.gateway';
 import { Session, SessionStatus } from '@/modules/whatsapp/entities/session.entity';
 import { Message } from '@/modules/whatsapp/entities/message.entity';
 import { Conversation } from '@/modules/whatsapp/entities/conversation.entity';
@@ -43,13 +45,21 @@ describe('WhatsApp E2E', () => {
   };
 
   const mockBaileysClient = {
-    createSocket: jest.fn(),
+    createSocket: jest.fn().mockResolvedValue(undefined),
     endSocket: jest.fn(),
     hasActiveSocket: jest.fn().mockReturnValue(true),
   };
 
+  const mockWhatsAppGateway = {
+    emitQrGenerated: jest.fn(),
+    emitSessionStatus: jest.fn(),
+    emitMessageNew: jest.fn(),
+    emitMessageStatus: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [EventEmitterModule.forRoot()],
       controllers: [SessionStatusController],
       providers: [
         SessionManagerService,
@@ -59,6 +69,7 @@ describe('WhatsApp E2E', () => {
         { provide: QrService, useValue: {} },
         { provide: MessageHandlerService, useValue: {} },
         { provide: MessageRelayService, useValue: {} },
+        { provide: WhatsAppGateway, useValue: mockWhatsAppGateway },
       ],
     })
       .overrideGuard(JwtAuthGuard)

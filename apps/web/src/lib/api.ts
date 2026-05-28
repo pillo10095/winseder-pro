@@ -29,7 +29,7 @@ export async function login(email: string, password: string): Promise<LoginRespo
     throw new Error(body.message ?? 'Error al iniciar sesión');
   }
 
-  return body;
+  return body.data as LoginResponse;
 }
 
 export async function register(
@@ -49,7 +49,7 @@ export async function register(
     throw new Error(body.message ?? 'Error al registrarse');
   }
 
-  return body;
+  return body.data as RegisterResponse;
 }
 
 export async function refreshToken(refreshTokenValue: string): Promise<AuthResponse> {
@@ -65,7 +65,7 @@ export async function refreshToken(refreshTokenValue: string): Promise<AuthRespo
     throw new Error(body.message ?? 'Error al refrescar token');
   }
 
-  return body;
+  return body.data as AuthResponse;
 }
 
 export async function logout(token: string): Promise<void> {
@@ -97,14 +97,28 @@ export async function getMe(token: string): Promise<UserResponse> {
     throw new Error(body.message ?? 'Error al obtener perfil');
   }
 
-  return body;
+  return body.data as UserResponse;
+}
+
+/** Current auth token in memory (set on login, survives page nav) */
+let _token: string | null = null;
+let _refreshToken: string | null = null;
+
+export function setAuthToken(token: string | null, refresh?: string | null) {
+  _token = token;
+  if (refresh !== undefined) _refreshToken = refresh;
+}
+
+export function getAuthToken(): string | null {
+  return _token;
 }
 
 export async function fetchWithAuth(
   url: string,
   options: RequestInit = {},
 ): Promise<Response> {
-  const token = localStorage.getItem('token');
+  const token = _token ?? localStorage.getItem('token');
+  const refreshTok = _refreshToken ?? localStorage.getItem('refresh_token');
 
   const headers = new Headers(options.headers);
   if (token) {
@@ -113,23 +127,23 @@ export async function fetchWithAuth(
 
   const res = await fetch(url, { ...options, headers });
 
-  if (res.status === 401) {
-    const refreshTokenValue = localStorage.getItem('refresh_token');
-    if (refreshTokenValue) {
-      try {
-        const refreshRes = await refreshToken(refreshTokenValue);
-        localStorage.setItem('token', refreshRes.access_token);
-        localStorage.setItem('refresh_token', refreshRes.refresh_token);
+  if (res.status === 401 && refreshTok) {
+    try {
+      const refreshRes = await refreshToken(refreshTok);
+      _token = refreshRes.access_token;
+      _refreshToken = refreshRes.refresh_token;
+      localStorage.setItem('token', refreshRes.access_token);
+      localStorage.setItem('refresh_token', refreshRes.refresh_token);
 
-        headers.set('Authorization', `Bearer ${refreshRes.access_token}`);
-        return fetch(url, { ...options, headers });
-      } catch {
-        localStorage.removeItem('token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
-        throw new Error('Sesión expirada');
-      }
+      headers.set('Authorization', `Bearer ${refreshRes.access_token}`);
+      return fetch(url, { ...options, headers });
+    } catch {
+      _token = null;
+      _refreshToken = null;
+      localStorage.removeItem('token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user');
+      throw new Error('Sesión expirada');
     }
   }
 
