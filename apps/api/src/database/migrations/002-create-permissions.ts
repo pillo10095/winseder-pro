@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex } from 'typeorm';
 
-export class CreatePermissions002 implements MigrationInterface {
-  name = 'CreatePermissions002';
+export class Migration1779947951886 implements MigrationInterface {
+  name = 'Migration1779947951886';
 
   async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(

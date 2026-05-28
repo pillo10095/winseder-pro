@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class CreatePipelineStages014 implements MigrationInterface {
-  name = 'CreatePipelineStages014';
+export class Migration1779947963886 implements MigrationInterface {
+  name = 'Migration1779947963886';
 
   async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(

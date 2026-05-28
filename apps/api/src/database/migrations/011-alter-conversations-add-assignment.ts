@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner, TableColumn, TableForeignKey, TableIndex } from 'typeorm';
 
-export class AlterConversationsAddAssignment011 implements MigrationInterface {
-  name = 'AlterConversationsAddAssignment011';
+export class Migration1779947960886 implements MigrationInterface {
+  name = 'Migration1779947960886';
 
   async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.addColumn(

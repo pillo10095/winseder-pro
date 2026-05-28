@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
 
-export class AddDefaultProbabilityToPipelineStages018 implements MigrationInterface {
-  name = 'AddDefaultProbabilityToPipelineStages018';
+export class Migration1779947967886 implements MigrationInterface {
+  name = 'Migration1779947967886';
 
   async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.addColumn(

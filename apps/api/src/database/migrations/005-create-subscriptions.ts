@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex } from 'typeorm';
 
-export class CreateSubscriptions005 implements MigrationInterface {
-  name = 'CreateSubscriptions005';
+export class Migration1779947954886 implements MigrationInterface {
+  name = 'Migration1779947954886';
 
   async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
