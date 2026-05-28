@@ -30,5 +30,11 @@ jobs:
       - name: Tests
         run: npm run test -- --filter=@wisender/api
 
-      - name: Build (debug)
-        run: npx turbo build --force 2>&1
+      - name: Build API (debug)
+        working-directory: ./apps/api
+        run: |
+          echo "=== nest build start ==="
+          npx nest build 2>&1 || true
+          echo "=== exit code: $? ==="
+          echo "=== dist folder ==="
+          ls -la dist/ 2>/dev/null || echo "dist not created"
