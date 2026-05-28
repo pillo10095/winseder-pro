@@ -21,6 +21,8 @@ const defaultSidebarItems: SidebarItem[] = [
   { label: "Campañas", href: "/campaigns" },
   { label: "Contactos", href: "/contacts" },
   { label: "Automatizaciones", href: "/automations" },
+  { label: "IA", href: "/settings/ai" },
+  { label: "Anti-Ban", href: "/anti-ban" },
 ];
 
 export function DashboardShell({ sidebar, children }: DashboardShellProps) {

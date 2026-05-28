@@ -23,6 +23,9 @@ const ACTION_LABELS: Record<string, string> = {
   'reply.image': 'Responder imagen',
   webhook: 'Webhook',
   ai_hook: 'IA externa',
+  ai_reply: 'Responder con IA',
+  ai_classify: 'Clasificar (IA)',
+  ai_hot_lead: 'Lead caliente (IA)',
 };
 
 export default function AutomationsPage() {

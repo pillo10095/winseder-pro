@@ -23,6 +23,9 @@ const ACTION_LABELS: Record<string, string> = {
   'reply.image': 'Responder con imagen',
   webhook: 'Disparar webhook',
   ai_hook: 'Enviar a IA externa',
+  ai_reply: 'Responder con IA',
+  ai_classify: 'Clasificar intención (IA)',
+  ai_hot_lead: 'Detectar lead caliente (IA)',
 };
 
 export default function AutomationDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -153,12 +156,24 @@ function AutomationDetail({ id }: { id: string }) {
                   </span>
                 </div>
                 <div className="mt-2 ml-8 flex flex-col gap-1">
-                  {Object.entries(action.config).map(([key, value]) => (
-                    <div key={key} className="flex items-center gap-2 text-xs">
-                      <span className="font-medium text-muted-foreground">{key}:</span>
-                      <span className="font-mono">{value}</span>
-                    </div>
-                  ))}
+                  {Object.entries(action.config).length > 0 ? (
+                    Object.entries(action.config).map(([key, value]) => (
+                      <div key={key} className="flex items-center gap-2 text-xs">
+                        <span className="font-medium text-muted-foreground">{key}:</span>
+                        <span className="font-mono">{value}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <span className="text-xs text-muted-foreground italic">
+                      {action.type === 'ai_classify'
+                        ? 'Clasifica en: compra, soporte, reclamo, consulta'
+                        : action.type === 'ai_hot_lead'
+                          ? 'Detecta intención de compra automáticamente'
+                          : action.type === 'ai_reply'
+                            ? 'Usa la configuración del agente IA'
+                            : '—'}
+                    </span>
+                  )}
                 </div>
               </div>
             ))}

@@ -7,6 +7,7 @@ import { ChatHeader } from '@/components/chats/chat-header';
 import { ChatMessages } from '@/components/chats/chat-messages';
 import { ChatInput } from '@/components/chats/chat-input';
 import { EmptyState } from '@/components/chats/empty-state';
+import { AiSuggestion } from '@/components/chats/ai-suggestion';
 
 export default function ChatsPage() {
   // Connect WebSocket for real-time updates
@@ -52,6 +53,24 @@ export default function ChatsPage() {
           <>
             <ChatHeader conversation={activeConversation} />
             <ChatMessages messages={conversationMessages} isLoading={false} />
+            <div className="border-t border-border px-4 py-2">
+              <AiSuggestion
+                lastMessage={conversationMessages[conversationMessages.length - 1]?.content ?? undefined}
+                conversationContext={conversationMessages
+                  .slice(-10)
+                  .map((m: any) => `${m.sender}: ${m.content}`)
+                  .join('\n')}
+                onSelectSuggestion={(suggestion) => {
+                  const input = document.querySelector<HTMLTextAreaElement>(
+                    'textarea[placeholder*="Escribí"]',
+                  );
+                  if (input) {
+                    input.value = suggestion;
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                  }
+                }}
+              />
+            </div>
             <ChatInput />
           </>
         ) : (

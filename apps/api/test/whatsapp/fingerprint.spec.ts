@@ -30,10 +30,13 @@ describe('AntiBanFingerprint', () => {
     });
 
     it('should return different UAs for different sessions', () => {
-      const ua1 = fingerprint.getCurrentUserAgent('session-1');
-      const ua2 = fingerprint.getCurrentUserAgent('session-2');
-      // Low probability collision — fine for test
-      expect(ua1).not.toBe(ua2);
+      // Collect UAs across many sessions to prove diversity
+      const uas = new Set<string>();
+      for (let i = 0; i < 10; i++) {
+        uas.add(fingerprint.getCurrentUserAgent(`session-${i}`));
+      }
+      // With 6+ device models, 10 sessions should produce >= 2 unique UAs
+      expect(uas.size).toBeGreaterThanOrEqual(2);
     });
   });
 

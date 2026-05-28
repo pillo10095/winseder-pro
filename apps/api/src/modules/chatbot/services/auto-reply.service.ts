@@ -4,8 +4,10 @@ import { WASocket } from '@whiskeysockets/baileys';
 import { RuleAction } from '../entities/automation-rule.entity';
 import { BaileysClientService } from '../../whatsapp/services/baileys-client.service';
 import { AiHookService } from './ai-hook.service';
+import { AiActionService } from './ai-action.service';
 
 export interface AutoReplyRequest {
+  companyId: string;
   sessionId: string;
   remoteJid: string;
   content: string;
@@ -19,10 +21,11 @@ export class AutoReplyService {
   constructor(
     private readonly baileysClient: BaileysClientService,
     private readonly aiHook: AiHookService,
+    private readonly aiAction: AiActionService,
   ) {}
 
   async execute(request: AutoReplyRequest): Promise<boolean> {
-    const { sessionId, remoteJid, content, action } = request;
+    const { companyId, sessionId, remoteJid, content, action } = request;
 
     switch (action.type) {
       case 'reply.text': {
@@ -58,6 +61,17 @@ export class AutoReplyService {
         });
         return true;
       }
+
+      case 'ai_reply':
+      case 'ai_classify':
+      case 'ai_hot_lead':
+        return this.aiAction.execute({
+          companyId,
+          sessionId,
+          remoteJid,
+          content,
+          action,
+        });
 
       case 'webhook':
         // Webhook actions are handled by the webhook module via events

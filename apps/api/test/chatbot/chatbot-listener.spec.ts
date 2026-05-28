@@ -94,12 +94,13 @@ describe('ChatbotListenerService', () => {
       senderJid: '5511999999999@s.whatsapp.net',
       type: 'TEXT',
     });
-    expect(autoReply.execute).toHaveBeenCalledWith({
+    expect(autoReply.execute).toHaveBeenCalledWith(expect.objectContaining({
       sessionId: 'session-1',
       remoteJid: '5511999999999@s.whatsapp.net',
       content: 'Hello',
+      companyId: 'company-1',
       action: { type: 'reply.text', config: { text: 'Auto reply' } },
-    });
+    }));
   });
 
   it('should handle multiple actions per rule', async () => {

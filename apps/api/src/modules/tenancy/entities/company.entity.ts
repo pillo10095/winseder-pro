@@ -2,9 +2,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+
+import { Subscription } from './subscription.entity';
 
 @Entity('companies')
 export class Company {
@@ -23,6 +26,9 @@ export class Company {
   @Column({ type: 'json', nullable: true })
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   settings!: Record<string, any>;
+
+  @OneToMany(() => Subscription, (s) => s.company)
+  subscriptions!: Subscription[];
 
   @Column({ default: true })
   is_active!: boolean;

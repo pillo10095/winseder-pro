@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { MediaModule } from '../media/media.module';
 import { Session } from './entities/session.entity';
 import { Message } from './entities/message.entity';
 import { Conversation } from './entities/conversation.entity';
@@ -25,6 +26,7 @@ import { WhatsAppGateway } from './gateways/whatsapp.gateway';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Session, Message, Conversation]),
+    MediaModule,
   ],
   controllers: [
     SessionController,

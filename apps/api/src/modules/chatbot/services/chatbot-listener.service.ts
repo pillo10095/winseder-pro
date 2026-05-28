@@ -63,6 +63,7 @@ export class ChatbotListenerService {
             });
           } else {
             await this.autoReply.execute({
+              companyId: session.company_id,
               sessionId: payload.sessionId,
               remoteJid: payload.conversationId,
               content: payload.content,

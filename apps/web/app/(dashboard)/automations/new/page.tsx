@@ -26,6 +26,9 @@ const ACTION_TYPE_OPTIONS = [
   { value: 'reply.image', label: 'Responder con imagen' },
   { value: 'webhook', label: 'Disparar webhook' },
   { value: 'ai_hook', label: 'Enviar a IA externa' },
+  { value: 'ai_reply', label: 'Responder con IA' },
+  { value: 'ai_classify', label: 'Clasificar intención (IA)' },
+  { value: 'ai_hot_lead', label: 'Detectar lead caliente (IA)' },
 ] as const;
 
 function emptyCondition(): Condition {
@@ -96,6 +99,9 @@ export default function NewAutomationPage() {
           if (a.type === 'reply.image') return a.config.url?.trim();
           if (a.type === 'webhook') return a.config.url?.trim();
           if (a.type === 'ai_hook') return a.config.endpoint?.trim();
+          if (a.type === 'ai_reply') return true; // no config required
+          if (a.type === 'ai_classify') return true;
+          if (a.type === 'ai_hot_lead') return true;
           return true;
         }),
       });
@@ -120,6 +126,12 @@ export default function NewAutomationPage() {
         return [{ key: 'url', label: 'URL del webhook', placeholder: 'https://ejemplo.com/webhook' }];
       case 'ai_hook':
         return [{ key: 'endpoint', label: 'Endpoint IA', placeholder: 'https://ejemplo.com/ai-webhook' }];
+      case 'ai_reply':
+        return [{ key: 'system_prompt', label: 'Prompt del agente (opcional)', placeholder: 'Respondé de forma amable...' }];
+      case 'ai_classify':
+        return [];
+      case 'ai_hot_lead':
+        return [];
       default:
         return [];
     }
@@ -250,16 +262,30 @@ export default function NewAutomationPage() {
 
                 {/* Dynamic config fields */}
                 <div className="flex flex-col gap-2">
-                  {actionConfigFields(action).map((field) => (
-                    <div key={field.key} className="flex flex-col gap-1">
-                      <Label className="text-xs">{field.label}</Label>
-                      <Input
-                        value={action.config[field.key] ?? ''}
-                        onChange={(e) => updateActionConfig(i, field.key, e.target.value)}
-                        placeholder={field.placeholder}
-                      />
-                    </div>
-                  ))}
+                  {(() => {
+                    const fields = actionConfigFields(action);
+                    if (fields.length === 0) {
+                      return (
+                        <p className="text-xs text-muted-foreground italic">
+                          {action.type === 'ai_classify'
+                            ? 'Clasifica el mensaje automáticamente: compra, soporte, reclamo, consulta.'
+                            : action.type === 'ai_hot_lead'
+                              ? 'Analiza automáticamente si el mensaje tiene intención de compra.'
+                              : ''}
+                        </p>
+                      );
+                    }
+                    return fields.map((field) => (
+                      <div key={field.key} className="flex flex-col gap-1">
+                        <Label className="text-xs">{field.label}</Label>
+                        <Input
+                          value={action.config[field.key] ?? ''}
+                          onChange={(e) => updateActionConfig(i, field.key, e.target.value)}
+                          placeholder={field.placeholder}
+                        />
+                      </div>
+                    ));
+                  })()}
                 </div>
               </div>
             ))}

@@ -6,16 +6,19 @@ import { AutomationRuleRepository } from './repositories/automation-rule.reposit
 import { RuleEvaluatorService } from './services/rule-evaluator.service';
 import { AutoReplyService } from './services/auto-reply.service';
 import { AiHookService } from './services/ai-hook.service';
+import { AiActionService } from './services/ai-action.service';
 import { ChatbotListenerService } from './services/chatbot-listener.service';
 import { AutomationRuleController } from './controllers/automation-rule.controller';
 import { WhatsAppModule } from '../whatsapp/whatsapp.module';
 import { WebhooksModule } from '../webhooks/webhooks.module';
+import { AiModule } from '../ai/ai.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([AutomationRule]),
     WhatsAppModule,
     WebhooksModule,
+    AiModule,
   ],
   controllers: [AutomationRuleController],
   providers: [
@@ -23,6 +26,7 @@ import { WebhooksModule } from '../webhooks/webhooks.module';
     RuleEvaluatorService,
     AutoReplyService,
     AiHookService,
+    AiActionService,
     ChatbotListenerService,
   ],
   exports: [AutomationRuleRepository],

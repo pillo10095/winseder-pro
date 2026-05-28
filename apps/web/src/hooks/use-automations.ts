@@ -9,7 +9,7 @@ export type Condition = {
 };
 
 export type Action = {
-  type: 'reply.text' | 'reply.image' | 'webhook' | 'ai_hook';
+  type: 'reply.text' | 'reply.image' | 'webhook' | 'ai_hook' | 'ai_reply' | 'ai_classify' | 'ai_hot_lead';
   config: Record<string, string>;
 };
 

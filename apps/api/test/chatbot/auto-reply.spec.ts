@@ -2,6 +2,7 @@ jest.mock('@whiskeysockets/baileys', () => ({}));
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { AutoReplyService } from '@/modules/chatbot/services/auto-reply.service';
+import { AiActionService } from '@/modules/chatbot/services/ai-action.service';
 import { AiHookService } from '@/modules/chatbot/services/ai-hook.service';
 import { BaileysClientService } from '@/modules/whatsapp/services/baileys-client.service';
 import { RuleAction } from '@/modules/chatbot/entities/automation-rule.entity';
@@ -29,6 +30,7 @@ describe('AutoReplyService', () => {
         AutoReplyService,
         { provide: BaileysClientService, useValue: baileysClient },
         { provide: AiHookService, useValue: aiHook },
+        { provide: AiActionService, useValue: { executeAction: jest.fn() } },
       ],
     }).compile();
 

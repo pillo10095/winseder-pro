@@ -22,6 +22,9 @@ import { InboxModule } from './modules/inbox/inbox.module';
 import { WebhooksModule } from './modules/webhooks/webhooks.module';
 import { CampaignsModule } from './modules/campaigns/campaigns.module';
 import { CrmModule } from './modules/crm/crm.module';
+import { AiModule } from './modules/ai/ai.module';
+import { AntiBanModule } from './modules/anti-ban/anti-ban.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 /**
  * AppModule centraliza la infraestructura transversal del backend.
@@ -61,7 +64,10 @@ import { CrmModule } from './modules/crm/crm.module';
     InboxModule,
     WebhooksModule,
     CampaignsModule,
-    CrmModule
+    CrmModule,
+    AiModule,
+    AntiBanModule,
+    AdminModule
   ]
 })
 export class AppModule implements NestModule {

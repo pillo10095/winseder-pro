@@ -23,6 +23,12 @@ describe('Database Migrations', () => {
     '016-create-activities.ts',
     '017-create-contacts.ts',
     '018-add-default-probability-to-pipeline-stages.ts',
+    '019-create-templates.ts',
+    '020-create-campaigns.ts',
+    '021-create-campaign-contacts.ts',
+    '022-create-imports-log.ts',
+    '023-create-ai.ts',
+    '024-create-audit-logs.ts',
   ];
 
   describe.each(expectedMigrations)('%s', (filename) => {
