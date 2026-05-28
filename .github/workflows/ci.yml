@@ -41,10 +41,15 @@ jobs:
           echo "=== npm version ==="
           npm --version
           echo "=== check nest availability ==="
-          which npx || echo "no npx"
           npx --yes nest --version 2>&1 || echo "nest not available"
           echo "=== nest build start ==="
+          set +e
           npx nest build 2>&1
-          echo "=== exit code: $? ==="
+          EXIT_CODE=$?
+          set -e
+          echo "=== nest build exit code: $EXIT_CODE ==="
           echo "=== dist folder ==="
           ls -la dist/ 2>/dev/null || echo "dist not created"
+          echo "=== tsconfig check ==="
+          cat tsconfig.build.json 2>/dev/null || echo "no tsconfig.build.json"
+          cat tsconfig.json 2>/dev/null || echo "no tsconfig.json"
