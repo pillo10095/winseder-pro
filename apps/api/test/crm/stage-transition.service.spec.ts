@@ -36,28 +36,28 @@ describe('StageTransitionService', () => {
   afterEach(() => jest.clearAllMocks());
 
   describe('moveDeal', () => {
-    it('should move a deal to a new stage', async () => {
+    it('should move a deal to a new stage with userId', async () => {
       dealService.findById.mockResolvedValue(mockDeal);
       dealService.moveStage.mockResolvedValue({ ...mockDeal, pipeline_stage_id: 'stage-2' });
 
-      const result = await service.moveDeal('deal-1', 'stage-2');
+      const result = await service.moveDeal('deal-1', 'stage-2', 'user-1');
 
       expect(result).toBeDefined();
-      expect(dealService.moveStage).toHaveBeenCalledWith('deal-1', 'stage-2', undefined);
+      expect(dealService.moveStage).toHaveBeenCalledWith('deal-1', 'stage-2', 'user-1', undefined);
     });
 
     it('should pass the reason when moving', async () => {
       dealService.findById.mockResolvedValue(mockDeal);
 
-      await service.moveDeal('deal-1', 'stage-6', 'Closed');
+      await service.moveDeal('deal-1', 'stage-6', 'user-1', 'Closed');
 
-      expect(dealService.moveStage).toHaveBeenCalledWith('deal-1', 'stage-6', 'Closed');
+      expect(dealService.moveStage).toHaveBeenCalledWith('deal-1', 'stage-6', 'user-1', 'Closed');
     });
 
     it('should throw NotFoundException if deal does not exist', async () => {
       dealService.findById.mockResolvedValue(null);
 
-      await expect(service.moveDeal('nonexistent', 'stage-2')).rejects.toThrow(NotFoundException);
+      await expect(service.moveDeal('nonexistent', 'stage-2', 'user-1')).rejects.toThrow(NotFoundException);
     });
   });
 });

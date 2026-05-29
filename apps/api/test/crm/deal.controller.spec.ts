@@ -130,9 +130,9 @@ describe('DealController', () => {
       const moved = { id: 'deal-1', pipeline_stage_id: 'stage-2' };
       mockStageTransitionService.moveDeal.mockResolvedValue(moved);
 
-      const result = await controller.moveStage('deal-1', dto as any);
+      const result = await controller.moveStage('deal-1', dto as any, 'user-1');
 
-      expect(stageTransitionService.moveDeal).toHaveBeenCalledWith('deal-1', dto.pipeline_stage_id, dto.reason);
+      expect(stageTransitionService.moveDeal).toHaveBeenCalledWith('deal-1', 'stage-2', 'user-1', 'Qualified');
       expect(result).toEqual(moved);
     });
 
@@ -140,7 +140,7 @@ describe('DealController', () => {
       const dto = { pipeline_stage_id: 'stage-2' };
       mockStageTransitionService.moveDeal.mockRejectedValue(new NotFoundException('Deal not found'));
 
-      await expect(controller.moveStage('non-existent', dto as any)).rejects.toThrow(NotFoundException);
+      await expect(controller.moveStage('non-existent', dto as any, 'user-1')).rejects.toThrow(NotFoundException);
     });
   });
 
