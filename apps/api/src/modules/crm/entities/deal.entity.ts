@@ -64,6 +64,18 @@ export class Deal {
   @Column({ type: 'text', nullable: true })
   won_lost_reason!: string | null;
 
+  @Column({ type: 'simple-array', nullable: true })
+  tags!: string[] | null;
+
+  @Column({ type: 'datetime', nullable: true })
+  last_activity_at!: Date | null;
+
+  @Column({ length: 200, nullable: true, type: 'varchar' })
+  next_action!: string | null;
+
+  @Column({ type: 'datetime', nullable: true })
+  next_action_date!: Date | null;
+
   @CreateDateColumn()
   created_at!: Date;
 
