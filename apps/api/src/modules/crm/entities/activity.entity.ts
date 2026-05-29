@@ -18,6 +18,8 @@ export enum ActivityType {
   MEETING = 'meeting',
   NOTE = 'note',
   TASK = 'task',
+  WHATSAPP = 'whatsapp',
+  SYSTEM = 'system',
 }
 
 @Entity('activities')
