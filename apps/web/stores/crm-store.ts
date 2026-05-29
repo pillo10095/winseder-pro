@@ -72,7 +72,11 @@ export const useCRMStore = create<CRMState>((set, get) => ({
     set(state => ({
       leads: state.leads.map(l =>
         l.id === dealId
-          ? { ...l, pipeline_stage: { ...l.pipeline_stage, id: newStageKey } }
+          ? {
+              ...l,
+              pipeline_stage_id: newStageKey,
+              pipeline_stage: { ...l.pipeline_stage, id: newStageKey },
+            }
           : l
       ),
     }));
@@ -127,7 +131,7 @@ export const useCRMStore = create<CRMState>((set, get) => ({
 
   emit: (type, payload) => {
     set(state => ({
-      eventLog: [...state.eventLog.slice(-50), { type, payload, timestamp: Date.now() }],
+      eventLog: [...state.eventLog.slice(-49), { type, payload, timestamp: Date.now() }],
     }));
   },
 }));
