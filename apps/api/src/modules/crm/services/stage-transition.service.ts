@@ -12,6 +12,7 @@ export class StageTransitionService {
   async moveDeal(
     dealId: string,
     targetStageId: string,
+    userId: string,
     reason?: string,
   ): Promise<Deal | null> {
     const deal = await this.dealService.findById(dealId);
@@ -19,7 +20,7 @@ export class StageTransitionService {
       throw new NotFoundException('Deal not found');
     }
 
-    const updated = await this.dealService.moveStage(dealId, targetStageId, reason);
+    const updated = await this.dealService.moveStage(dealId, targetStageId, userId, reason);
 
     this.logger.log(`Deal ${dealId} moved to stage ${targetStageId}`);
 

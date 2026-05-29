@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 
 import { CompanyId } from '../../../common/decorators/company-id.decorator';
+import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { DealService } from '../services/deal.service';
 import { CreateDealDto } from '../dto/create-deal.dto';
 import { UpdateDealDto } from '../dto/update-deal.dto';
@@ -59,8 +60,12 @@ export class DealController {
   }
 
   @Put(':id/stage')
-  async moveStage(@Param('id') id: string, @Body() dto: MoveDealDto) {
-    return this.stageTransitionService.moveDeal(id, dto.pipeline_stage_id, dto.reason);
+  async moveStage(
+    @Param('id') id: string,
+    @Body() dto: MoveDealDto,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.stageTransitionService.moveDeal(id, dto.pipeline_stage_id, userId, dto.reason);
   }
 
   @Delete(':id')
