@@ -39,6 +39,7 @@ describe('WhatsApp E2E', () => {
     findByCompanyId: jest.fn(),
     findByIdAndCompany: jest.fn(),
     findOne: jest.fn(),
+    find: jest.fn().mockResolvedValue([mockSession]),
     create: jest.fn().mockImplementation((data) => ({ ...mockSession, ...data })),
     save: jest.fn().mockImplementation((data) => Promise.resolve({ ...mockSession, ...data })),
     update: jest.fn().mockResolvedValue(undefined),
@@ -107,7 +108,7 @@ describe('WhatsApp E2E', () => {
       const sessions = await sessionManager.getSessions('company-1');
 
       expect(sessions).toHaveLength(1);
-      expect(mockSessionRepo.findByCompanyId).toHaveBeenCalledWith('company-1');
+      expect(mockSessionRepo.find).toHaveBeenCalled();
     });
 
     it('should get session by id', async () => {

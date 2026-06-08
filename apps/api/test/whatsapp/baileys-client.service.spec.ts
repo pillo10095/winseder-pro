@@ -17,6 +17,7 @@ import { BaileysClientService } from '@/modules/whatsapp/services/baileys-client
 import { SessionRepository } from '@/modules/whatsapp/repositories/session.repository';
 import { BaileysAuthService } from '@/modules/whatsapp/services/baileys-auth.service';
 import { BaileysReconnectService } from '@/modules/whatsapp/services/baileys-reconnect.service';
+import { ContactSyncService } from '@/modules/whatsapp/services/contact-sync.service';
 import { QrService } from '@/modules/whatsapp/services/qr.service';
 import { QrEventsService } from '@/modules/whatsapp/services/qr-events.service';
 import {
@@ -33,6 +34,7 @@ describe('BaileysClientService', () => {
   let reconnectService: jest.Mocked<BaileysReconnectService>;
   let qrService: jest.Mocked<QrService>;
   let qrEvents: jest.Mocked<QrEventsService>;
+  let contactSyncService: jest.Mocked<ContactSyncService>;
 
   let processHandler: (events: Record<string, unknown>) => Promise<void>;
   const mockSocket = {
@@ -80,6 +82,10 @@ describe('BaileysClientService', () => {
       emitQrGenerated: jest.fn(),
     } as any;
 
+    contactSyncService = {
+      syncContacts: jest.fn(),
+    } as any;
+
     (fetchLatestBaileysVersion as jest.Mock).mockResolvedValue({
       version: [2, 3000, 1],
     });
@@ -94,6 +100,7 @@ describe('BaileysClientService', () => {
         { provide: BaileysReconnectService, useValue: reconnectService },
         { provide: QrService, useValue: qrService },
         { provide: QrEventsService, useValue: qrEvents },
+        { provide: ContactSyncService, useValue: contactSyncService },
       ],
     }).compile();
 
@@ -301,6 +308,39 @@ describe('BaileysClientService', () => {
           ],
         },
       });
+    });
+
+    it('should handle contacts.upsert and sync individual contacts', async () => {
+      await createSocketAndClearManualDisconnect('session-1', 'company-1');
+
+      await processHandler({
+        'contacts.upsert': [
+          { id: '5511911111111@s.whatsapp.net', name: 'Alice' },
+          { id: '5511922222222@s.whatsapp.net', name: 'Bob' },
+          { id: '9999999999@g.us', name: 'Group' },
+        ],
+      });
+
+      expect(contactSyncService.syncContacts).toHaveBeenCalledWith(
+        'session-1',
+        'company-1',
+        [
+          { id: '5511911111111@s.whatsapp.net', name: 'Alice' },
+          { id: '5511922222222@s.whatsapp.net', name: 'Bob' },
+        ],
+      );
+    });
+
+    it('should skip contacts.upsert when no individual contacts', async () => {
+      await createSocketAndClearManualDisconnect('session-1', 'company-1');
+
+      await processHandler({
+        'contacts.upsert': [
+          { id: '9999999999@g.us', name: 'Group' },
+        ],
+      });
+
+      expect(contactSyncService.syncContacts).not.toHaveBeenCalled();
     });
   });
 

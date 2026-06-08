@@ -44,6 +44,32 @@ export class SessionManagerService implements OnModuleInit {
     this.eventEmitter.on(QR_EVENTS.CODE_EXPIRED, (event: { sessionId: string }) => {
       this.qrCache.delete(event.sessionId);
     });
+
+    // Auto-reconnect sessions that were CONNECTED before server restart
+    this.restoreSessions();
+  }
+
+  private async restoreSessions(): Promise<void> {
+    try {
+      const connected = await this.sessionRepository.findByStatus(SessionStatus.CONNECTED);
+      if (connected.length === 0) {
+        this.logger.log('No connected sessions to restore');
+        return;
+      }
+
+      this.logger.log(`Restoring ${connected.length} session(s)...`);
+      for (const session of connected) {
+        this.logger.log(`Reconnecting session ${session.id} (${session.session_name})`);
+        await this.sessionRepository.update(session.id, {
+          status: SessionStatus.CONNECTING,
+        });
+        this.baileysClient.createSocket(session.id, session.company_id).catch((err) => {
+          this.logger.error(`Failed to restore session ${session.id}: ${err.message}`);
+        });
+      }
+    } catch (err) {
+      this.logger.error('Error restoring sessions', err);
+    }
   }
 
   /**
@@ -75,8 +101,18 @@ export class SessionManagerService implements OnModuleInit {
   /**
    * Get all sessions for a company.
    */
-  async getSessions(companyId: string): Promise<Session[]> {
-    return this.sessionRepository.findByCompanyId(companyId);
+  async getSessions(companyId: string, status?: string): Promise<Session[]> {
+    if (status && Object.values(SessionStatus).includes(status as SessionStatus)) {
+      return this.sessionRepository.find({
+        where: { company_id: companyId, status: status as SessionStatus },
+        order: { created_at: 'DESC' },
+      });
+    }
+    // Por defecto solo sesiones CONNECTED
+    return this.sessionRepository.find({
+      where: { company_id: companyId, status: SessionStatus.CONNECTED },
+      order: { created_at: 'DESC' },
+    });
   }
 
   /**

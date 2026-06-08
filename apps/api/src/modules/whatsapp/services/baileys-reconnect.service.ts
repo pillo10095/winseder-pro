@@ -11,7 +11,7 @@ export interface ReconnectResult {
 export class BaileysReconnectService {
   private readonly logger = new Logger(BaileysReconnectService.name);
 
-  private readonly maxRetries = 3;
+  private readonly maxRetries = 4;
   private retryCounters = new Map<string, number>();
   private timers = new Map<string, NodeJS.Timeout>();
 
@@ -55,8 +55,8 @@ export class BaileysReconnectService {
 
   getBackoffDelay(sessionId: string): number {
     const attempt = this.retryCounters.get(sessionId) || 0;
-    // Exponential backoff: 5s, 15s, 45s
-    return Math.min(5000 * Math.pow(3, attempt), 45000);
+    // Exponential backoff: 5s, 15s, 45s, 135s
+    return Math.min(5000 * Math.pow(3, attempt), 135000);
   }
 
   scheduleReconnect(

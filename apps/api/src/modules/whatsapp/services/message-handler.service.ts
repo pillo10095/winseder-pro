@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { proto } from '@whiskeysockets/baileys';
 
 import { MessageStatus, MessageType } from '../entities/message.entity';
@@ -32,6 +33,7 @@ export class MessageHandlerService {
     private readonly sessionRepository: SessionRepository,
     private readonly mediaDownloader: MediaDownloaderService,
     private readonly mediaThumbnail: MediaThumbnailService,
+    private readonly eventEmitter: EventEmitter2,
     @InjectRepository(Media)
     private readonly mediaRepo: Repository<Media>,
   ) {}
@@ -77,6 +79,7 @@ export class MessageHandlerService {
   async processMessage(
     msg: proto.IWebMessageInfo,
     sessionId: string,
+    companyId: string = '',
   ): Promise<ParsedMessage> {
     const key = msg.key;
     if (!key) {
@@ -129,6 +132,11 @@ export class MessageHandlerService {
         status: fromMe ? MessageStatus.SENT : MessageStatus.DELIVERED,
       }),
     );
+
+    // Emit automation events
+    if (!fromMe && companyId) {
+      this.eventEmitter.emit('whatsapp.message.received', { companyId, waId: remoteJid, name: msg.pushName || undefined });
+    }
 
     // Download media if present
     if (type !== MessageType.TEXT) {

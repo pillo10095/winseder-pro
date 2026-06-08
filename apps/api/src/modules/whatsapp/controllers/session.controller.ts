@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -13,6 +14,7 @@ import { Request } from 'express';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CreateSessionDto } from '../dto/create-session.dto';
 import { SessionManagerService } from '../services/session-manager.service';
+import { SessionStatus } from '../entities/session.entity';
 
 @Controller('whatsapp/sessions')
 @UseGuards(JwtAuthGuard)
@@ -29,8 +31,14 @@ export class SessionController {
   }
 
   @Get()
-  async list(@Req() req: Request) {
-    const sessions = await this.sessionManager.getSessions(req.companyId!);
+  async list(
+    @Req() req: Request,
+    @Query('status') status?: string,
+  ) {
+    const sessions = await this.sessionManager.getSessions(
+      req.companyId!,
+      status,
+    );
     return { data: sessions };
   }
 

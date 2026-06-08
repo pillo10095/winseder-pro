@@ -1,11 +1,15 @@
 import { Module } from '@nestjs/common';
+import { BullModule } from '@nestjs/bullmq';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AuthModule } from '../auth/auth.module';
+import { CampaignsModule } from '../campaigns/campaigns.module';
 import { MediaModule } from '../media/media.module';
 import { Session } from './entities/session.entity';
 import { Message } from './entities/message.entity';
 import { Conversation } from './entities/conversation.entity';
+import { Contact } from '../crm/entities/contact.entity';
+import { ContactSyncService } from './services/contact-sync.service';
 import { SessionRepository } from './repositories/session.repository';
 import { MessageRepository } from './repositories/message.repository';
 import { ConversationRepository } from './repositories/conversation.repository';
@@ -17,6 +21,7 @@ import { QrEventsService } from './services/qr-events.service';
 import { MessageHandlerService } from './services/message-handler.service';
 import { MessageRelayService } from './services/message-relay.service';
 import { SessionManagerService } from './services/session-manager.service';
+import { MessageDispatchProcessor } from './processors/message-dispatch.processor';
 import { SessionController } from './controllers/session.controller';
 import { SessionStatusController } from './controllers/session-status.controller';
 import { MessageController } from './controllers/message.controller';
@@ -27,8 +32,10 @@ import { WhatsAppGateway } from './gateways/whatsapp.gateway';
 @Module({
   imports: [
     AuthModule,
-    TypeOrmModule.forFeature([Session, Message, Conversation]),
+    TypeOrmModule.forFeature([Session, Message, Conversation, Contact]),
     MediaModule,
+    CampaignsModule,
+    BullModule.registerQueue({ name: 'message-dispatch' }),
   ],
   controllers: [
     SessionController,
@@ -51,6 +58,9 @@ import { WhatsAppGateway } from './gateways/whatsapp.gateway';
     MessageHandlerService,
     MessageRelayService,
     SessionManagerService,
+    ContactSyncService,
+    // Processors
+    MessageDispatchProcessor,
     // Gateways
     WhatsAppGateway,
   ],

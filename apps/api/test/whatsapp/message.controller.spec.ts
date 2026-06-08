@@ -16,7 +16,11 @@ describe('MessageController', () => {
     create: jest.fn(),
   };
 
-  const mockConversationRepo = {};
+  const mockConversationRepo = {
+    findOne: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+  };
 
   beforeEach(async () => {
     jest.useFakeTimers({ now: new Date('2026-05-28T12:00:00Z') });
@@ -89,13 +93,20 @@ describe('MessageController', () => {
       );
     });
 
-    it('should return error when conversation_id is missing', async () => {
+    it('should auto-create conversation when conversation_id is missing', async () => {
       const dto = { content: 'Hello' };
+      const createdConv = { id: 'auto-conv-1' };
+      mockConversationRepo.create.mockReturnValue(createdConv);
+      mockConversationRepo.save.mockResolvedValue(createdConv);
+      const saved = { id: 'msg-3' };
+      mockMessageRepo.create.mockReturnValue(saved);
+      mockMessageRepo.save.mockResolvedValue(saved);
 
-      const result = await controller.send('session-1', dto as any);
+      await controller.send('session-1', dto as any);
 
-      expect(result).toEqual({ error: 'conversation_id is required' });
-      expect(mockMessageRepo.save).not.toHaveBeenCalled();
+      expect(mockConversationRepo.create).toHaveBeenCalled();
+      expect(mockConversationRepo.save).toHaveBeenCalled();
+      expect(mockMessageRepo.save).toHaveBeenCalled();
     });
   });
 });

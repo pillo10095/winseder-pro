@@ -66,7 +66,7 @@ describe('SessionController', () => {
 
       const result = await controller.list(mockRequest());
 
-      expect(sessionManager.getSessions).toHaveBeenCalledWith('company-1');
+      expect(sessionManager.getSessions).toHaveBeenCalledWith('company-1', undefined);
       expect(result).toEqual({ data: sessions });
     });
 

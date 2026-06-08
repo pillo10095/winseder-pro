@@ -89,9 +89,10 @@ describe('BaileysReconnectService', () => {
     it('should NOT reconnect after max retries exceeded', () => {
       const boomError = { output: { statusCode: 515 }, isBoom: true } as any;
 
-      service.evaluateDisconnect('session-1', { error: boomError });
-      service.evaluateDisconnect('session-1', { error: boomError });
-      service.evaluateDisconnect('session-1', { error: boomError });
+      // maxRetries=4 → 5 calls to exhaust (counter: 0→1→2→3→4 then fail)
+      for (let i = 0; i < 4; i++) {
+        service.evaluateDisconnect('session-1', { error: boomError });
+      }
 
       const result = service.evaluateDisconnect('session-1', { error: boomError });
 

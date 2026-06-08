@@ -5,6 +5,7 @@ jest.mock('@whiskeysockets/baileys', () => ({
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { MessageHandlerService } from '@/modules/whatsapp/services/message-handler.service';
 import { MessageRepository } from '@/modules/whatsapp/repositories/message.repository';
 import { ConversationRepository } from '@/modules/whatsapp/repositories/conversation.repository';
@@ -97,6 +98,7 @@ describe('MessageHandlerService', () => {
         { provide: SessionRepository, useValue: sessionRepo },
         { provide: MediaDownloaderService, useValue: mediaDownloader },
         { provide: MediaThumbnailService, useValue: mediaThumbnail },
+        { provide: EventEmitter2, useValue: { emit: jest.fn() } },
         { provide: getRepositoryToken(Media), useValue: mediaRepo },
       ],
     }).compile();
