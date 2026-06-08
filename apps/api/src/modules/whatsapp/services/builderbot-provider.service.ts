@@ -7,6 +7,7 @@ import { ConversationRepository } from '../repositories/conversation.repository'
 import { QrEventsService, QrGeneratedEvent } from './qr-events.service';
 import { QrService } from './qr.service';
 import { MessageHandlerService } from './message-handler.service';
+import { extractAndCacheLidFromMessage } from '@builderbot/provider-baileys';
 import { CustomBaileysProvider } from './custom-baileys-provider';
 
 /** Check if a JID belongs to an individual contact (not a group or broadcast) */
@@ -200,6 +201,13 @@ export class BuilderbotProviderService implements OnApplicationShutdown {
         } catch (err) {
           this.logger.error(`[${sessionId}] Error handling message`, err);
         }
+
+        // Extract LID→PN mapping from each incoming message and cache it
+        try {
+          await extractAndCacheLidFromMessage(provider.lidCache, msg as any);
+        } catch {
+          // Silently ignore — LID caching is best-effort
+        }
       }
     });
 
@@ -289,6 +297,7 @@ export class BuilderbotProviderService implements OnApplicationShutdown {
 
     const entry = this.sessions.get(sessionId);
     if (entry) {
+      entry.provider.lidCache.close?.();
       entry.provider.dispose().catch((err) => this.logger.warn(`Error disposing provider ${sessionId}`, err));
       this.sessions.delete(sessionId);
     }
@@ -317,6 +326,17 @@ export class BuilderbotProviderService implements OnApplicationShutdown {
       sessionId,
       companyId: entry.companyId,
     }));
+  }
+
+  // ── Message sending ─────────────────────────────────────────────────
+
+  /**
+   * Send a text message through a session, resolving @lid JIDs automatically.
+   */
+  async sendMessage(sessionId: string, jid: string, content: string): Promise<void> {
+    const entry = this.sessions.get(sessionId);
+    if (!entry) throw new Error(`Session ${sessionId} not found`);
+    await entry.provider.sendMessage(jid, content);
   }
 
   // ── Contact extraction ───────────────────────────────────────────────

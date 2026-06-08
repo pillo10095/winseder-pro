@@ -9,5 +9,8 @@ module.exports = {
   testEnvironment: 'node',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    // Mock @builderbot/provider-baileys — its CJS bundle loads ESM-only
+    // baileys which Jest + ts-jest (CJS mode) cannot parse.
+    '^@builderbot/provider-baileys$': '<rootDir>/test/__mocks__/@builderbot/provider-baileys.ts',
   },
 };

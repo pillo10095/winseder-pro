@@ -10,6 +10,10 @@ import {
   isJidBroadcast,
   proto,
 } from '@whiskeysockets/baileys';
+import {
+  MemoryLidCache,
+  LidCache,
+} from '@builderbot/provider-baileys';
 import NodeCache from 'node-cache';
 import type { Boom } from '@hapi/boom';
 import { EventEmitter } from 'node:events';
@@ -46,6 +50,9 @@ export class CustomBaileysProvider {
   /** Reconnection state */
   private reconnectAttempts = 0;
   private readonly maxReconnectAttempts = 10;
+
+  /** LID (Local Identifier) cache for resolving @lid JIDs to phone numbers */
+  public readonly lidCache: LidCache = new MemoryLidCache(86400 * 30); // 30-day TTL
 
   /** Caches */
   public readonly msgRetryCounterCache = new NodeCache({
@@ -193,6 +200,7 @@ export class CustomBaileysProvider {
     this.msgRetryCounterCache.close();
     this.userDevicesCache.close();
     this.messageCache.close();
+    this.lidCache.close?.();
     this.events.removeAllListeners();
   }
 
@@ -229,9 +237,19 @@ export class CustomBaileysProvider {
 
   /**
    * Try to resolve a LID to a phone number JID.
-   * Uses the signal repository's lidMapping if available.
+   * Checks the BuilderBot LID cache first, then falls back to
+   * the signal repository's lidMapping if available.
    */
   async getPNForLID(lid: string): Promise<string | null> {
+    // 1. Check BuilderBot LID cache (populated from incoming messages)
+    try {
+      const cached = await this.lidCache.get(lid);
+      if (cached) return cached;
+    } catch {
+      // cache may be closed or unavailable
+    }
+
+    // 2. Fall back to signal repository lidMapping
     try {
       const mapping = (this.vendor as any)?.signalRepository?.lidMapping;
       if (mapping?.getPNForLID) {
