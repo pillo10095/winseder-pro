@@ -47,8 +47,8 @@ export class AutoDealCreatorService {
         value: 0,
         source: 'whatsapp',
         triggered_by_automation: true,
-      } as any),
-    ) as unknown as Deal;
+      }),
+    );
 
     this.logger.log(`Created deal ${deal.id} for contact ${contact.id}`);
 
@@ -70,8 +70,8 @@ export class AutoDealCreatorService {
         phone: phone || null,
         source: 'whatsapp',
         whatsapp_labels: [],
-      } as any),
-    ) as unknown as Contact;
+      }),
+    );
     this.logger.log(`Created contact ${contact.id} from WhatsApp ${waId}`);
     return contact;
   }

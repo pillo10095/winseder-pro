@@ -92,7 +92,7 @@ export class CampaignService {
   async setTriggerEvent(id: string, triggerEvent: { type: string; stage_id: string } | null): Promise<Campaign> {
     const campaign = await this.findById(id);
     if (!campaign) throw new Error('Campaign not found');
-    await this.campaignRepo.update(id, { trigger_event: triggerEvent } as any);
+    await this.campaignRepo.update(id, { trigger_event: triggerEvent });
     return this.findById(id) as Promise<Campaign>;
   }
 }

@@ -83,7 +83,7 @@ export class CampaignDispatcherListener {
         for (const variableName of templateVariables) {
           // Map template variables to contact fields
           // e.g. {{name}} -> contact.name, {{phone}} -> contact.phone
-          const value = (cc.contact as any)?.[variableName];
+          const value = (cc.contact as Record<string, unknown>)?.[variableName];
           if (value != null) {
             vars[variableName] = String(value);
           }

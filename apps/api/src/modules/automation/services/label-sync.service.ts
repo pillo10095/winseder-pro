@@ -25,7 +25,7 @@ export class LabelSyncService {
       return;
     }
 
-    const currentLabels: string[] = (contact as any).whatsapp_labels ?? [];
+    const currentLabels: string[] = contact.whatsapp_labels ?? [];
 
     if (action === 'added') {
       if (!currentLabels.includes(labelName)) {
@@ -36,7 +36,7 @@ export class LabelSyncService {
       if (idx !== -1) currentLabels.splice(idx, 1);
     }
 
-    await this.contactRepo.update(contact.id, { whatsapp_labels: currentLabels } as any);
+    await this.contactRepo.update(contact.id, { whatsapp_labels: currentLabels });
 
     if (action === 'added') {
       this.eventEmitter.emit('whatsapp.label_added', { contactId: contact.id, labelName, companyId, waId });

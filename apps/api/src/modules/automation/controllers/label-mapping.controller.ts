@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { CompanyId } from '../../../common/decorators/company-id.decorator';
 import { LabelMappingService } from '../services/label-mapping.service';
 import { CreateLabelMappingDto } from '../dto/create-label-mapping.dto';

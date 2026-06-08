@@ -7,13 +7,13 @@ import {
   Body,
   Param,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 
 import { CompanyId } from '../../../common/decorators/company-id.decorator';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { DealService } from '../services/deal.service';
 import { CreateDealDto } from '../dto/create-deal.dto';
+import { UpdateDealDto } from '../dto/update-deal.dto';
 import { MoveDealDto } from '../dto/move-deal.dto';
 import type { QueryPipelineDto } from '../dto/query-pipeline.dto';
 
@@ -49,7 +49,7 @@ export class PipelineLeadsController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() dto: any) {
+  async update(@Param('id') id: string, @Body() dto: UpdateDealDto) {
     return this.dealService.update(id, dto);
   }
 

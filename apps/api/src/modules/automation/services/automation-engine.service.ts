@@ -107,7 +107,7 @@ export class AutomationEngineService {
     const campaigns = await this.campaignRepo.find({ where: { company_id: companyId } });
 
     for (const campaign of campaigns) {
-      const trigger = (campaign as any).trigger_event as { type?: string; stage_id?: string } | null;
+      const trigger = campaign.trigger_event;
       if (trigger && trigger.type === 'deal.stage_changed' && trigger.stage_id === toStageId) {
         const deal = await this.dealRepo.findOne({ where: { id: dealId }, relations: ['contact'] });
         if (deal && deal.contact_id) {
