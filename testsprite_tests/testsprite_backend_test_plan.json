@@ -1,0 +1,52 @@
+[
+  {
+    "id": "TC001",
+    "title": "test_auth_register_and_login_flow",
+    "description": "Verify register and login flow. Step 1: POST /api/auth/register with body {\"name\": \"Test User\", \"email\": \"unique@example.com\", \"password\": \"TestPass123!\"} expects 201. Step 2: POST /api/auth/login with body {\"email\": same_email, \"password\": \"TestPass123!\"} expects 201 (NOT 200 because NestJS @Post defaults to 201). Response wrap: both return {data: {...}, meta: {...}}. Access token is at response.data.access_token."
+  },
+  {
+    "id": "TC002",
+    "title": "test_auth_login_with_invalid_credentials",
+    "description": "POST /api/auth/login with invalid body {\"email\": \"wrong@test.com\", \"password\": \"wrongpass\"} expects 401 unauthorized."
+  },
+  {
+    "id": "TC003",
+    "title": "test_session_creation_and_listing_with_authentication",
+    "description": "IMPORTANT: Login returns 201 NOT 200. Step 1: POST /api/auth/register with body {\"name\":\"Test User\",\"email\":\"unique@example.com\",\"password\":\"TestPass123!\"} expects 201. Step 2: POST /api/auth/login expects 201 (NOT 200). Get token from response.data.access_token (nested inside data wrapper). Step 3: POST /api/whatsapp/sessions (NOT /sessions/create) with body {\"session_name\":\"test_session\"} and Authorization Bearer token, expects 201. Get sessionId from response.data.id. Step 4: GET /api/whatsapp/sessions with auth, expects 200 with body {data: [{id, session_name, ...}], meta: {...}}."
+  },
+  {
+    "id": "TC004",
+    "title": "test_session_creation_without_authentication",
+    "description": "POST /api/whatsapp/sessions with body {\"session_name\": \"test_session_without_auth\"} and NO Authorization header expects 401 unauthorized."
+  },
+  {
+    "id": "TC005",
+    "title": "test_whatsapp_send_message_with_authentication",
+    "description": "IMPORTANT: Login returns 201 NOT 200. Step 1: POST /api/auth/register with body {\"name\":\"Test User\",\"email\":\"unique@example.com\",\"password\":\"TestPass123!\"} expects 201. Step 2: POST /api/auth/login expects 201 (NOT 200). Token at response.data.access_token. Step 3: POST /api/whatsapp/sessions (NOT /sessions/create) with body {\"session_name\":\"test\"}, get sessionId from response.data.id. Step 4: POST /api/whatsapp/sessions/{sessionId}/messages (NOT /api/whatsapp/send) with body {\"type\":\"text\",\"content\":\"Hello\",\"conversation_id\":\"test\"} and auth header, expects 201."
+  },
+  {
+    "id": "TC006",
+    "title": "test_whatsapp_send_message_without_authentication",
+    "description": "POST /api/whatsapp/sessions/test-id/messages with body {\"type\":\"text\",\"content\":\"Hello\",\"conversation_id\":\"test\"} and NO Authorization header expects 401 unauthorized."
+  },
+  {
+    "id": "TC007",
+    "title": "test_whatsapp_webhook_receiver",
+    "description": "POST /api/whatsapp/webhook with a valid webhook payload returns 201 Created with body {data: {status: \"ok\"}, meta: {...}}."
+  },
+  {
+    "id": "TC008",
+    "title": "test_team_inbox_conversations_listing_with_authentication",
+    "description": "IMPORTANT: Login returns 201 NOT 200. Step 1: POST /api/auth/register with body {\"name\":\"Test User\",\"email\":\"unique@example.com\",\"password\":\"TestPass123!\"} expects 201. Step 2: POST /api/auth/login expects 201 (NOT 200). Token at response.data.access_token. Step 3: POST /api/whatsapp/sessions with body {\"session_name\":\"test\"}, get sessionId from response.data.id. Step 4: GET /api/inbox/{sessionId}/conversations with auth header, expects 200 with body {data: {items: [...], total: N}, meta: {...}}."
+  },
+  {
+    "id": "TC009",
+    "title": "test_team_inbox_conversations_listing_without_authentication",
+    "description": "GET /api/inbox/test-session-id/conversations with NO auth header expects 200 with body {data: {items: [...], total: N}, meta: {...}} (this endpoint has no auth guard)."
+  },
+  {
+    "id": "TC010",
+    "title": "test_automation_rule_creation_with_valid_data",
+    "description": "IMPORTANT: Register REQUIRES name field. Login returns 201 NOT 200. Step 1: POST /api/auth/register with body {\"name\":\"Test User\",\"email\":\"unique@example.com\",\"password\":\"TestPass123!\"} expects 201. DO NOT omit name field. Step 2: POST /api/auth/login expects 201 (NOT 200). Token at response.data.access_token (wrapped in data). Step 3: POST /api/automation-rules (NOT /api/chatbot/flows) with Authorization Bearer token and body {\"name\":\"Test Flow\",\"conditions\":[{\"field\":\"message.content\",\"operator\":\"contains\",\"value\":\"hi\"}],\"actions\":[{\"type\":\"reply.text\",\"config\":{\"message\":\"Hello!\"}}]} expects 201 with id at response.data.id."
+  }
+]

@@ -1,0 +1,133 @@
+version: "2"
+type: backend
+tech_stack:
+  - language: TypeScript
+  - framework: NestJS 10.3.0
+  - database: MySQL (TypeORM)
+  - cache: Redis
+  - storage: MinIO
+  - runtime: Node.js 20+
+features:
+  - name: Authentication
+    description: JWT auth system - register and login
+    files:
+      - apps/api/src/auth/
+    endpoints:
+      - method: POST
+        path: /api/auth/register
+        description: Register a new user
+        auth_required: false
+        request_body:
+          required:
+            name: string
+            email: string
+            password: string
+          optional:
+            role: string
+          example:
+            name: "Test User"
+            email: "user@example.com"
+            password: "TestPass123!"
+        response:
+          status: 201
+          body: '{data: {access_token: string, refresh_token: string, user: {id, name, email, role}}, meta: {...}}'
+      - method: POST
+        path: /api/auth/login
+        description: Login (expects 201 status, NOT 200)
+        auth_required: false
+        request_body:
+          required:
+            email: string
+            password: string
+          example:
+            email: "user@example.com"
+            password: "TestPass123!"
+        response:
+          status: 201  # CRITICAL: NestJS @Post() returns 201, NOT 200
+          body: '{data: {access_token: string, refresh_token: string, user: {id, name, email, role}}, meta: {...}}'
+  - name: Session Management
+    description: WhatsApp device sessions
+    files:
+      - apps/api/src/whatsapp/controllers/session.controller.ts
+    endpoints:
+      - method: GET
+        path: /api/whatsapp/sessions
+        description: List all sessions
+        auth_required: true
+        response:
+          status: 200
+          body: '{data: [{id, session_name, status, ...}], meta: {...}}'
+      - method: POST
+        path: /api/whatsapp/sessions
+        description: Create a new session (body: {"session_name": "..."})
+        auth_required: true
+        request_body:
+          required:
+            session_name: string
+          example: '{"session_name": "test_session"}'
+        response:
+          status: 201
+          body: '{data: {id: string, session_name: string, status: string, ...}, meta: {...}}'
+  - name: WhatsApp Messaging
+    description: Send/receive WhatsApp messages via device sessions
+    files:
+      - apps/api/src/whatsapp/
+    endpoints:
+      - method: POST
+        path: /api/whatsapp/sessions/:sessionId/messages
+        description: Send message via a session
+        auth_required: true
+        request_body:
+          example: '{"type": "text", "content": "Hello", "conversation_id": "test"}'
+        response:
+          status: 201
+      - method: POST
+        path: /api/whatsapp/webhook
+        description: Webhook receiver for inbound events
+        auth_required: false
+        response:
+          status: 201
+          body: '{data: {status: "ok"}, meta: {...}}'
+  - name: Team Inbox
+    description: Multi-agent conversation inbox
+    files:
+      - apps/api/src/inbox/
+    endpoints:
+      - method: GET
+        path: /api/inbox/:sessionId/conversations
+        description: List conversations for a session
+        auth_required: false
+        response:
+          status: 200
+          body: '{data: {items: [...], total: number}, meta: {...}}'
+  - name: Chatbot Automation
+    description: Automated chatbot automation rules
+    files:
+      - apps/api/src/chatbot/
+    endpoints:
+      - method: POST
+        path: /api/automation-rules
+        description: Create automation rule (body: {"name": "...", "conditions": [...], "actions": [...]})
+        auth_required: true
+        request_body:
+          required:
+            name: string
+            conditions: array
+            actions: array
+          example: '{"name": "Test Flow", "conditions": [{"field": "message.content", "operator": "contains", "value": "hi"}], "actions": [{"type": "reply.text", "config": {"message": "Hello!"}}]}'
+        response:
+          status: 201
+          body: '{data: {id: string, name: string, conditions: [...], actions: [...]}, meta: {...}}'
+      - method: GET
+        path: /api/automation-rules
+        description: List automation rules
+        auth_required: true
+        response:
+          status: 200
+known_limitations:
+  - "Post routes in NestJS default to 201 status. Login (POST /api/auth/login) returns 201, NOT 200. Do NOT check for 200 on login."
+  - "Register POST /api/auth/register requires name field. Do NOT omit name."
+  - "Login response wraps in {data: {access_token, refresh_token, user}, meta: {timestamp, path}} - access_token is at response.data.access_token, NOT response.access_token"
+  - "Session routes use prefix /whatsapp/sessions, NOT /sessions/create"
+  - "Message route: POST /api/whatsapp/sessions/{sessionId}/messages, NOT /api/whatsapp/send"
+  - "Automation rules: POST /api/automation-rules, NOT /api/chatbot/flows"

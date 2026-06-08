@@ -14,3 +14,6 @@ data/
 coverage/
 .turbo/
 winseder-pro/
+*.err
+*.out
+.atl/*.cache.json

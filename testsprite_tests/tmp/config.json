@@ -1,0 +1,17 @@
+{
+  "status": "init",
+  "scope": "codebase",
+  "type": "backend",
+  "projectPath": "C:\\AppServ\\www\\wisender-pro",
+  "localEndpoint": "http://localhost:4000/api",
+  "serverMode": "development",
+  "executionArgs": {
+    "projectName": "wisender-pro",
+    "projectPath": "C:\\AppServ\\www\\wisender-pro",
+    "testIds": [],
+    "additionalInstruction": "FIX: 1) Login returns 201 NOT 200. 2) Register needs name field. 3) Token at response.data.access_token. 4) Sessions: POST /api/whatsapp/sessions. 5) Messages: POST /api/whatsapp/sessions/{sessionId}/messages. 6) Automation rules: POST /api/automation-rules.",
+    "serverMode": "development",
+    "envs": {}
+  },
+  "serverPort": 56069
+}
