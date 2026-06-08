@@ -4,6 +4,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Session, SessionStatus } from '../entities/session.entity';
 import { SessionRepository } from '../repositories/session.repository';
 import { BaileysClientService } from './baileys-client.service';
+import { BuilderbotProviderService } from './builderbot-provider.service';
 import { QrEventsService, QR_EVENTS, QrGeneratedEvent } from './qr-events.service';
 import { QrService } from './qr.service';
 import { MessageHandlerService } from './message-handler.service';
@@ -19,7 +20,10 @@ export class SessionManagerService implements OnModuleInit {
 
   constructor(
     private readonly sessionRepository: SessionRepository,
+    /** Legacy Baileys client — kept for coexistence during migration */
     private readonly baileysClient: BaileysClientService,
+    /** New BuilderBot provider — used for all new sessions */
+    private readonly builderbotProvider: BuilderbotProviderService,
     private readonly qrService: QrService,
     private readonly qrEvents: QrEventsService,
     private readonly messageHandler: MessageHandlerService,
@@ -63,7 +67,8 @@ export class SessionManagerService implements OnModuleInit {
         await this.sessionRepository.update(session.id, {
           status: SessionStatus.CONNECTING,
         });
-        this.baileysClient.createSocket(session.id, session.company_id).catch((err) => {
+        // Use new BuilderBot provider for all session restores
+        this.builderbotProvider.createSession(session.id, session.company_id).catch((err) => {
           this.logger.error(`Failed to restore session ${session.id}: ${err.message}`);
         });
       }
@@ -90,9 +95,9 @@ export class SessionManagerService implements OnModuleInit {
       }),
     );
 
-    // Start Baileys connection in background (don't block the response)
-    this.baileysClient.createSocket(session.id, companyId).catch((err) => {
-      this.logger.error(`Failed to create Baileys socket for ${session.id}: ${err.message}`);
+    // Start BuilderBot connection in background (don't block the response)
+    this.builderbotProvider.createSession(session.id, companyId).catch((err) => {
+      this.logger.error(`Failed to create session ${session.id}: ${err.message}`);
     });
 
     return session;
@@ -131,7 +136,7 @@ export class SessionManagerService implements OnModuleInit {
       throw new Error('Session not found');
     }
 
-    await this.baileysClient.endSocket(id);
+    await this.builderbotProvider.endSession(id);
     await this.sessionRepository.update(id, {
       status: SessionStatus.DISCONNECTED,
       auth_state: null,
@@ -140,7 +145,6 @@ export class SessionManagerService implements OnModuleInit {
 
   /**
    * Get the QR code for a connecting session.
-   * Returns the current QR or throws if the session is not in QR_CODE state.
    */
   async getQrCode(id: string, companyId: string): Promise<string> {
     const session = await this.sessionRepository.findByIdAndCompany(id, companyId);
@@ -159,6 +163,26 @@ export class SessionManagerService implements OnModuleInit {
   }
 
   /**
+   * Get all connected sessions for a company.
+   */
+  getConnectedSessions(companyId: string): { sessionId: string; companyId: string }[] {
+    return this.builderbotProvider
+      .getConnectedSessions()
+      .filter((s) => s.companyId === companyId);
+  }
+
+  /**
+   * Manually extract WhatsApp contacts into the CRM.
+   */
+  async extractContacts(sessionId: string, companyId: string): Promise<{ created: number; skipped: number }> {
+    const session = await this.sessionRepository.findByIdAndCompany(sessionId, companyId);
+    if (!session) {
+      throw new Error('Session not found');
+    }
+    return this.builderbotProvider.extractContacts(sessionId, companyId);
+  }
+
+  /**
    * Health check: verify session connectivity.
    */
   async checkHealth(id: string): Promise<{ ok: boolean; status: SessionStatus; lastSeen?: Date }> {
@@ -167,7 +191,7 @@ export class SessionManagerService implements OnModuleInit {
       return { ok: false, status: SessionStatus.DISCONNECTED };
     }
 
-    const hasSocket = this.baileysClient.hasActiveSocket(id);
+    const hasSocket = this.builderbotProvider.hasActiveSocket(id);
     return {
       ok: hasSocket && session.status === SessionStatus.CONNECTED,
       status: session.status,

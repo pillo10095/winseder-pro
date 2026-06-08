@@ -13,9 +13,16 @@
     "migration:run": "ts-node -r tsconfig-paths/register ./src/database/run-migrations.ts",
     "seed": "ts-node -r tsconfig-paths/register ./src/seed.ts"
   },
+  "overrides": {
+    "baileys": "7.0.0-rc13",
+    "sharp": "0.34.5"
+  },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1054.0",
     "@aws-sdk/s3-request-presigner": "^3.1054.0",
+    "@builderbot/bot": "^1.4.2",
+    "@builderbot/provider-baileys": "^1.4.2",
+    "baileys": "7.0.0-rc13",
     "@bull-board/api": "^5.15.1",
     "@bull-board/express": "^5.15.1",
     "@cacheable/node-cache": "^3.0.1",

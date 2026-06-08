@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AuthModule } from '../auth/auth.module';
 import { CampaignsModule } from '../campaigns/campaigns.module';
+import { CrmModule } from '../crm/crm.module';
 import { MediaModule } from '../media/media.module';
 import { Session } from './entities/session.entity';
 import { Message } from './entities/message.entity';
@@ -16,6 +17,7 @@ import { ConversationRepository } from './repositories/conversation.repository';
 import { BaileysClientService } from './services/baileys-client.service';
 import { BaileysAuthService } from './services/baileys-auth.service';
 import { BaileysReconnectService } from './services/baileys-reconnect.service';
+import { BuilderbotProviderService } from './services/builderbot-provider.service';
 import { QrService } from './services/qr.service';
 import { QrEventsService } from './services/qr-events.service';
 import { MessageHandlerService } from './services/message-handler.service';
@@ -35,6 +37,7 @@ import { WhatsAppGateway } from './gateways/whatsapp.gateway';
     TypeOrmModule.forFeature([Session, Message, Conversation, Contact]),
     MediaModule,
     CampaignsModule,
+    CrmModule,
     BullModule.registerQueue({ name: 'message-dispatch' }),
   ],
   controllers: [
@@ -53,6 +56,7 @@ import { WhatsAppGateway } from './gateways/whatsapp.gateway';
     BaileysClientService,
     BaileysAuthService,
     BaileysReconnectService,
+    BuilderbotProviderService,
     QrService,
     QrEventsService,
     MessageHandlerService,
