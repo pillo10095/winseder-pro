@@ -2,7 +2,9 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Body,
+  Param,
   Query,
 } from '@nestjs/common';
 
@@ -39,5 +41,35 @@ export class ActivityController {
     @Body() dto: CreateActivityDto,
   ) {
     return this.activityService.create(companyId, userId, dto);
+  }
+
+  @Get('calendar')
+  async getCalendar(
+    @CompanyId() companyId: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ) {
+    const fromDate = from ? new Date(from) : new Date();
+    const toDate = to ? new Date(to) : new Date();
+    toDate.setDate(toDate.getDate() + 30);
+    return this.activityService.findByCalendarRange(companyId, fromDate, toDate);
+  }
+
+  @Patch(':id/complete')
+  async complete(
+    @CompanyId() companyId: string,
+    @CurrentUser('id') userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.activityService.complete(id, companyId, userId);
+  }
+
+  @Patch(':id')
+  async updateDate(
+    @CompanyId() companyId: string,
+    @Param('id') id: string,
+    @Body('activity_date') activityDate: string,
+  ) {
+    return this.activityService.updateDate(id, companyId, new Date(activityDate));
   }
 }

@@ -23,12 +23,14 @@ export class ContactController {
     @Query('search') search?: string,
     @Query('limit') limit?: string,
     @Query('cursor') cursor?: string,
+    @Query('labelIds') labelIds?: string,
   ) {
     const [contacts, total] = await this.contactService.findByCompanyId(
       companyId,
       search,
       limit ? parseInt(limit, 10) : 20,
       cursor,
+      labelIds ? labelIds.split(',') : undefined,
     );
     return { data: contacts, total };
   }

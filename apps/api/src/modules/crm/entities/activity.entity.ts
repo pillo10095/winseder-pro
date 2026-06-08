@@ -64,6 +64,16 @@ export class Activity {
   @Column({ type: 'datetime' })
   activity_date!: Date;
 
+  @Column({ type: 'datetime', nullable: true })
+  completed_at!: Date | null;
+
+  @Column({ nullable: true, type: 'varchar' })
+  completed_by!: string | null;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'completed_by' })
+  completed_by_user!: User | null;
+
   @CreateDateColumn()
   created_at!: Date;
 }

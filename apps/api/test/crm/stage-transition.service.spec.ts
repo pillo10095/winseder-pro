@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import { StageTransitionService } from '@/modules/crm/services/stage-transition.service';
 import { DealService } from '@/modules/crm/services/deal.service';
@@ -27,6 +28,7 @@ describe('StageTransitionService', () => {
       providers: [
         StageTransitionService,
         { provide: DealService, useValue: dealService },
+        { provide: EventEmitter2, useValue: { emit: jest.fn() } },
       ],
     }).compile();
 

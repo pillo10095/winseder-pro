@@ -14,8 +14,10 @@ export class ContactRepository extends Repository<Contact> {
     search?: string,
     limit = 20,
     cursor?: string,
+    labelIds?: string[],
   ): Promise<[Contact[], number]> {
     const qb = this.createQueryBuilder('c')
+      .leftJoinAndSelect('c.labels', 'labels')
       .where('c.company_id = :companyId', { companyId })
       .orderBy('c.created_at', 'DESC')
       .take(limit);
@@ -29,6 +31,11 @@ export class ContactRepository extends Repository<Contact> {
 
     if (cursor) {
       qb.andWhere('c.created_at < :cursor', { cursor });
+    }
+
+    if (labelIds && labelIds.length > 0) {
+      qb.innerJoin('contact_labels', 'cl', 'cl.contact_id = c.id')
+        .andWhere('cl.label_id IN (:...labelIds)', { labelIds });
     }
 
     return qb.getManyAndCount();

@@ -45,6 +45,9 @@ export class Deal {
   @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
   value!: number;
 
+  @Column({ length: 50, nullable: true, type: 'varchar' })
+  source!: string | null;
+
   @Column({ length: 200, nullable: true, type: 'varchar' })
   company_name!: string | null;
 
@@ -63,6 +66,9 @@ export class Deal {
 
   @Column({ type: 'text', nullable: true })
   won_lost_reason!: string | null;
+
+  @Column({ default: false })
+  triggered_by_automation!: boolean;
 
   @Column({ type: 'simple-array', nullable: true })
   tags!: string[] | null;

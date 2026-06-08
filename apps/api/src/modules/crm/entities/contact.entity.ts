@@ -3,12 +3,15 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 import { Company } from '../../tenancy/entities/company.entity';
+import { Label } from './label.entity';
 
 @Entity('contacts')
 export class Contact {
@@ -21,6 +24,14 @@ export class Contact {
   @ManyToOne(() => Company)
   @JoinColumn({ name: 'company_id' })
   company!: Company;
+
+  @ManyToMany(() => Label)
+  @JoinTable({
+    name: 'contact_labels',
+    joinColumn: { name: 'contact_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'label_id', referencedColumnName: 'id' },
+  })
+  labels!: Label[];
 
   @Column({ length: 200 })
   name!: string;
@@ -36,6 +47,12 @@ export class Contact {
 
   @Column({ length: 100, nullable: true, type: 'varchar' })
   source!: string | null;
+
+  @Column({ type: 'simple-array', nullable: true })
+  whatsapp_labels!: string[] | null;
+
+  @Column({ length: 100, nullable: true, type: 'varchar' })
+  wa_id!: string | null;
 
   @Column({ length: 100, nullable: true, type: 'varchar' })
   role!: string | null;

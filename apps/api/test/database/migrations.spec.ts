@@ -29,6 +29,7 @@ describe('Database Migrations', () => {
     '022-create-imports-log.ts',
     '023-create-ai.ts',
     '024-create-audit-logs.ts',
+    '025-create-labels.ts',
   ];
 
   describe.each(expectedMigrations)('%s', (filename) => {

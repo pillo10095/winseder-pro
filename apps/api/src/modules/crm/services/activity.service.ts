@@ -34,4 +34,36 @@ export class ActivityService {
   ): Promise<Activity[]> {
     return this.activityRepo.findByCompanyId(companyId, type, contactId, dealId, limit);
   }
+
+  async findByCalendarRange(
+    companyId: string,
+    from: Date,
+    to: Date,
+  ): Promise<Activity[]> {
+    return this.activityRepo.findByDateRange(companyId, from, to);
+  }
+
+  async complete(id: string, companyId: string, userId: string): Promise<Activity> {
+    const activity = await this.activityRepo.findOne({
+      where: { id, company_id: companyId },
+    });
+    if (!activity) {
+      throw new Error('Activity not found');
+    }
+    // Toggle: si ya está completada, la desmarca; si no, la marca
+    activity.completed_at = activity.completed_at ? null : new Date();
+    activity.completed_by = activity.completed_at ? userId : null;
+    return this.activityRepo.save(activity);
+  }
+
+  async updateDate(id: string, companyId: string, activityDate: Date): Promise<Activity> {
+    const activity = await this.activityRepo.findOne({
+      where: { id, company_id: companyId },
+    });
+    if (!activity) {
+      throw new Error('Activity not found');
+    }
+    activity.activity_date = activityDate;
+    return this.activityRepo.save(activity);
+  }
 }

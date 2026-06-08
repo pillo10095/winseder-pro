@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { DealService } from '@/modules/crm/services/deal.service';
 import { Deal } from '@/modules/crm/entities/deal.entity';
 import { DealRepository } from '@/modules/crm/repositories/deal.repository';
+import { ActivityService } from '@/modules/crm/services/activity.service';
 
 describe('CRM E2E — Deals', () => {
   let service: DealService;
@@ -38,6 +39,7 @@ describe('CRM E2E — Deals', () => {
       providers: [
         DealService,
         { provide: DealRepository, useValue: dealRepo },
+        { provide: ActivityService, useValue: { create: jest.fn() } },
       ],
     }).compile();
 
@@ -65,16 +67,17 @@ describe('CRM E2E — Deals', () => {
   });
 
   it('should move deal to another stage', async () => {
-    const result = await service.moveStage('deal-1', 'stage-2');
+    const result = await service.moveStage('deal-1', 'stage-2', 'user-1');
     expect(result).toBeDefined();
-    expect(dealRepo.update).toHaveBeenCalledWith('deal-1', { pipeline_stage_id: 'stage-2' });
+    expect(dealRepo.update).toHaveBeenCalledWith('deal-1', { pipeline_stage_id: 'stage-2', last_activity_at: expect.any(Date) });
   });
 
   it('should include reason when closing deal', async () => {
-    await service.moveStage('deal-1', 'stage-3', 'Customer signed contract');
+    await service.moveStage('deal-1', 'stage-3', 'user-1', 'Customer signed contract');
     expect(dealRepo.update).toHaveBeenCalledWith('deal-1', {
       pipeline_stage_id: 'stage-3',
       won_lost_reason: 'Customer signed contract',
+      last_activity_at: expect.any(Date),
     });
   });
 

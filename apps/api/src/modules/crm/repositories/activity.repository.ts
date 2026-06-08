@@ -38,4 +38,20 @@ export class ActivityRepository extends Repository<Activity> {
 
     return qb.getMany();
   }
+
+  async findByDateRange(
+    companyId: string,
+    from: Date,
+    to: Date,
+  ): Promise<Activity[]> {
+    return this.createQueryBuilder('a')
+      .leftJoinAndSelect('a.contact', 'contact')
+      .leftJoinAndSelect('a.deal', 'deal')
+      .leftJoinAndSelect('a.logged_by_user', 'user')
+      .where('a.company_id = :companyId', { companyId })
+      .andWhere('a.activity_date >= :from', { from })
+      .andWhere('a.activity_date <= :to', { to })
+      .orderBy('a.activity_date', 'ASC')
+      .getMany();
+  }
 }

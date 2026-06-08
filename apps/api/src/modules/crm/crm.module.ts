@@ -65,6 +65,10 @@ import { PipelineLeadsController } from './controllers/pipeline-leads.controller
     PipelineService,
     StageTransitionService,
   ],
-  exports: [],
+  exports: [
+    ContactRepository,
+    DealRepository,
+    PipelineStageRepository,
+  ],
 })
 export class CrmModule {}

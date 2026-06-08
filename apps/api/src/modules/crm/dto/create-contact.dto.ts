@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateContactDto {
   @IsString()
@@ -28,4 +28,9 @@ export class CreateContactDto {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  labelIds?: string[];
 }

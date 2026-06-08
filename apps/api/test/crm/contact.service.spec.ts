@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { ContactService } from '@/modules/crm/services/contact.service';
 import { Contact } from '@/modules/crm/entities/contact.entity';
 import { ContactRepository } from '@/modules/crm/repositories/contact.repository';
+import { Label } from '@/modules/crm/entities/label.entity';
 
 describe('ContactService', () => {
   let service: ContactService;
@@ -38,6 +39,7 @@ describe('ContactService', () => {
       providers: [
         ContactService,
         { provide: ContactRepository, useValue: contactRepo },
+        { provide: getRepositoryToken(Label), useValue: { findBy: jest.fn() } },
       ],
     }).compile();
 
@@ -72,13 +74,13 @@ describe('ContactService', () => {
 
       expect(contacts).toHaveLength(1);
       expect(total).toBe(1);
-      expect(contactRepo.findByCompanyId).toHaveBeenCalledWith('company-1', undefined, 20, undefined);
+      expect(contactRepo.findByCompanyId).toHaveBeenCalledWith('company-1', undefined, 20, undefined, undefined);
     });
 
     it('should support search, limit, and cursor', async () => {
       await service.findByCompanyId('company-1', 'john', 10, 'cursor-1');
 
-      expect(contactRepo.findByCompanyId).toHaveBeenCalledWith('company-1', 'john', 10, 'cursor-1');
+      expect(contactRepo.findByCompanyId).toHaveBeenCalledWith('company-1', 'john', 10, 'cursor-1', undefined);
     });
   });
 
@@ -87,7 +89,7 @@ describe('ContactService', () => {
       const result = await service.findById('contact-1');
 
       expect(result).toEqual(mockContact);
-      expect(contactRepo.findOne).toHaveBeenCalledWith({ where: { id: 'contact-1' } });
+      expect(contactRepo.findOne).toHaveBeenCalledWith({ where: { id: 'contact-1' }, relations: ['labels'] });
     });
 
     it('should return null if not found', async () => {

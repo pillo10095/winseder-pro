@@ -38,7 +38,7 @@ describe('ContactController', () => {
 
       const result = await controller.findAll(companyId, undefined, '20', undefined);
 
-      expect(contactService.findByCompanyId).toHaveBeenCalledWith(companyId, undefined, 20, undefined);
+      expect(contactService.findByCompanyId).toHaveBeenCalledWith(companyId, undefined, 20, undefined, undefined);
       expect(result).toEqual({ data: contacts, total: 1 });
     });
 
@@ -47,7 +47,7 @@ describe('ContactController', () => {
 
       await controller.findAll(companyId, undefined, undefined, undefined);
 
-      expect(contactService.findByCompanyId).toHaveBeenCalledWith(companyId, undefined, 20, undefined);
+      expect(contactService.findByCompanyId).toHaveBeenCalledWith(companyId, undefined, 20, undefined, undefined);
     });
 
     it('should search by term and use cursor', async () => {
@@ -56,7 +56,7 @@ describe('ContactController', () => {
 
       const result = await controller.findAll(companyId, 'Jane', '10', 'cursor-abc');
 
-      expect(contactService.findByCompanyId).toHaveBeenCalledWith(companyId, 'Jane', 10, 'cursor-abc');
+      expect(contactService.findByCompanyId).toHaveBeenCalledWith(companyId, 'Jane', 10, 'cursor-abc', undefined);
       expect(result).toEqual({ data: contacts, total: 1 });
     });
 
