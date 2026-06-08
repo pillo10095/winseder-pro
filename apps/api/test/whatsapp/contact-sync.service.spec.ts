@@ -1,13 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 
 import { ContactSyncService } from '@/modules/whatsapp/services/contact-sync.service';
+import { ContactRepository } from '@/modules/crm/repositories/contact.repository';
 import { Contact } from '@/modules/crm/entities/contact.entity';
 
 describe('ContactSyncService', () => {
   let service: ContactSyncService;
-  let contactRepo: jest.Mocked<Pick<Repository<Contact>, 'findOne' | 'create' | 'save'>>;
+  let contactRepo: jest.Mocked<Pick<ContactRepository, 'findOne' | 'create' | 'save' | 'findByCompanyId'>>;
 
   const companyId = 'company-1';
   const sessionId = 'session-1';
@@ -17,12 +16,13 @@ describe('ContactSyncService', () => {
       findOne: jest.fn().mockResolvedValue(null),
       create: jest.fn().mockImplementation((dto) => dto as Contact),
       save: jest.fn().mockResolvedValue(undefined),
+      findByCompanyId: jest.fn().mockResolvedValue([[], 0] as [Contact[], number]),
     } as any;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ContactSyncService,
-        { provide: getRepositoryToken(Contact), useValue: contactRepo },
+        { provide: ContactRepository, useValue: contactRepo },
       ],
     }).compile();
 
