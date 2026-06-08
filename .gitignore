@@ -13,3 +13,4 @@ data/
 *.sqlite
 coverage/
 .turbo/
+winseder-pro/

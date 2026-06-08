@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "dev": "nest start --watch",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
@@ -35,6 +36,7 @@
     "@nestjs/websockets": "^11.1.24",
     "@types/qrcode": "^1.5.6",
     "@whiskeysockets/baileys": "7.0.0-rc13",
+    "bottleneck": "^2.19.5",
     "bullmq": "^5.5.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",

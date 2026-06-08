@@ -10,8 +10,8 @@ const redisConnection = {
   password: process.env.REDIS_PASSWORD,
 };
 
-const CAMPAIGN_QUEUE = process.env.BULLMQ_CAMPAIGN_QUEUE ?? "campaign:dispatch";
-const MESSAGE_QUEUE = process.env.BULLMQ_MESSAGE_QUEUE ?? "message:dispatch";
+const CAMPAIGN_QUEUE = process.env.BULLMQ_CAMPAIGN_QUEUE ?? "campaign-dispatch";
+const MESSAGE_QUEUE = process.env.BULLMQ_MESSAGE_QUEUE ?? "message-dispatch";
 
 const messageQueue = new Queue(MESSAGE_QUEUE, { connection: redisConnection });
 
@@ -27,7 +27,7 @@ queueEvents.on("failed", ({ jobId, failedReason }) => {
 const worker = new Worker(
   CAMPAIGN_QUEUE,
   async (job) => {
-    const { campaignId, contacts, templateBody, variablesMap } = job.data;
+    const { campaignId, companyId, contacts, templateBody, variablesMap } = job.data;
     console.info(`[campaigns] Procesando campaña ${campaignId}: ${contacts.length} contactos`);
 
     let sent = 0;
@@ -41,8 +41,10 @@ const worker = new Worker(
 
       await messageQueue.add("send", {
         campaignId,
+        companyId,
         contactId: contact.id,
         phone: contact.phone,
+        contactName: contact.name,
         messageBody,
       });
 
