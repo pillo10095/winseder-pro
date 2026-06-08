@@ -54,6 +54,9 @@ export class Campaign {
   @Column({ default: 0 })
   total_count!: number;
 
+  @Column({ type: 'json', nullable: true })
+  trigger_event!: { type: string; stage_id: string } | null;
+
   @Column({ type: 'datetime', nullable: true })
   completed_at!: Date | null;
 

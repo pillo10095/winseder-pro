@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Delete,
   Body,
   Param,
@@ -84,6 +85,11 @@ export class CampaignController {
   async findContacts(@Param('id') id: string) {
     const contacts = await this.campaignContactRepo.findByCampaignId(id);
     return { data: contacts };
+  }
+
+  @Put(':id/trigger')
+  async setTrigger(@Param('id') id: string, @Body('trigger_event') triggerEvent: { type: string; stage_id: string } | null) {
+    return this.campaignService.setTriggerEvent(id, triggerEvent);
   }
 
   @Delete(':id')

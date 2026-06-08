@@ -2,6 +2,8 @@ import { Test, type TestingModule } from '@nestjs/testing';
 
 import { AutomationRuleController } from '@/modules/chatbot/controllers/automation-rule.controller';
 import { AutomationRuleRepository } from '@/modules/chatbot/repositories/automation-rule.repository';
+import { JwtTokenService } from '@/modules/auth/services/jwt.service';
+import { TokenBlacklistService } from '@/modules/auth/services/token-blacklist.service';
 
 describe('AutomationRuleController', () => {
   let controller: AutomationRuleController;
@@ -23,6 +25,8 @@ describe('AutomationRuleController', () => {
       controllers: [AutomationRuleController],
       providers: [
         { provide: AutomationRuleRepository, useValue: mockRuleRepo },
+        { provide: JwtTokenService, useValue: { verifyToken: jest.fn() } },
+        { provide: TokenBlacklistService, useValue: { isBlacklisted: jest.fn(), extractJtiFromToken: jest.fn() } },
       ],
     }).compile();
 

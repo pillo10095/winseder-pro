@@ -25,6 +25,7 @@ import { CrmModule } from './modules/crm/crm.module';
 import { AiModule } from './modules/ai/ai.module';
 import { AntiBanModule } from './modules/anti-ban/anti-ban.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { AutomationModule } from './modules/automation/automation.module';
 
 /**
  * AppModule centraliza la infraestructura transversal del backend.
@@ -67,7 +68,8 @@ import { AdminModule } from './modules/admin/admin.module';
     CrmModule,
     AiModule,
     AntiBanModule,
-    AdminModule
+    AdminModule,
+    AutomationModule
   ]
 })
 export class AppModule implements NestModule {

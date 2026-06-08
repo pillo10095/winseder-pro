@@ -9,6 +9,7 @@ import { AiHookService } from './services/ai-hook.service';
 import { AiActionService } from './services/ai-action.service';
 import { ChatbotListenerService } from './services/chatbot-listener.service';
 import { AutomationRuleController } from './controllers/automation-rule.controller';
+import { AuthModule } from '../auth/auth.module';
 import { WhatsAppModule } from '../whatsapp/whatsapp.module';
 import { WebhooksModule } from '../webhooks/webhooks.module';
 import { AiModule } from '../ai/ai.module';
@@ -16,6 +17,7 @@ import { AiModule } from '../ai/ai.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([AutomationRule]),
+    AuthModule,
     WhatsAppModule,
     WebhooksModule,
     AiModule,

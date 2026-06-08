@@ -1,4 +1,4 @@
-import { IsArray, IsDateString, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsArray, IsDateString, IsNotEmpty, IsObject, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateCampaignDto {
   @IsString()
@@ -17,4 +17,8 @@ export class CreateCampaignDto {
   @IsUUID('4', { each: true })
   @IsOptional()
   contact_ids?: string[];
+
+  @IsObject()
+  @IsOptional()
+  trigger_event?: { type: string; stage_id: string };
 }

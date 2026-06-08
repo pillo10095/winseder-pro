@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { BullModule } from '@nestjs/bullmq';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { Template } from './entities/template.entity';
@@ -12,6 +13,7 @@ import { CampaignContactRepository } from './repositories/campaign-contact.repos
 import { TemplateService } from './services/template.service';
 import { CampaignService } from './services/campaign.service';
 import { CsvImportService } from './services/csv-import.service';
+import { CampaignDispatcherListener } from './listeners/campaign-dispatcher.listener';
 
 import { TemplateController } from './controllers/template.controller';
 import { CampaignController } from './controllers/campaign.controller';
@@ -19,6 +21,7 @@ import { CampaignController } from './controllers/campaign.controller';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Template, Campaign, CampaignContact]),
+    BullModule.registerQueue({ name: 'campaign-dispatch' }),
   ],
   controllers: [
     TemplateController,
@@ -31,10 +34,12 @@ import { CampaignController } from './controllers/campaign.controller';
     TemplateService,
     CampaignService,
     CsvImportService,
+    CampaignDispatcherListener,
   ],
   exports: [
     CampaignService,
     CampaignRepository,
+    CampaignContactRepository,
   ],
 })
 export class CampaignsModule {}

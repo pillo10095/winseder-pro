@@ -1,4 +1,4 @@
-import { IsArray, IsBoolean, IsInt, IsNotEmpty, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
+import { IsArray, IsBoolean, IsInt, IsNotEmpty, IsObject, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 import { RuleAction, RuleCondition } from '../entities/automation-rule.entity';
@@ -22,7 +22,7 @@ class ActionDto implements RuleAction {
   @IsNotEmpty()
   type!: 'reply.text' | 'reply.image' | 'webhook' | 'ai_hook';
 
-  @IsArray()
+  @IsObject()
   config!: Record<string, string>;
 }
 

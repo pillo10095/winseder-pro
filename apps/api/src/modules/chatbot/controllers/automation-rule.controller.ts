@@ -6,14 +6,17 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 
 import { CompanyId } from '../../../common/decorators/company-id.decorator';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { AutomationRuleRepository } from '../repositories/automation-rule.repository';
 import { CreateAutomationRuleDto } from '../dto/create-automation-rule.dto';
 import { UpdateAutomationRuleDto } from '../dto/update-automation-rule.dto';
 
 @Controller('automation-rules')
+@UseGuards(JwtAuthGuard)
 export class AutomationRuleController {
   constructor(private readonly ruleRepo: AutomationRuleRepository) {}
 
