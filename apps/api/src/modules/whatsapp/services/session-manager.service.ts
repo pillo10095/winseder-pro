@@ -3,7 +3,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import { Session, SessionStatus } from '../entities/session.entity';
 import { SessionRepository } from '../repositories/session.repository';
-import { BaileysClientService } from './baileys-client.service';
 import { BuilderbotProviderService } from './builderbot-provider.service';
 import { QrEventsService, QR_EVENTS, QrGeneratedEvent } from './qr-events.service';
 import { QrService } from './qr.service';
@@ -20,9 +19,6 @@ export class SessionManagerService implements OnModuleInit {
 
   constructor(
     private readonly sessionRepository: SessionRepository,
-    /** Legacy Baileys client — kept for coexistence during migration */
-    private readonly baileysClient: BaileysClientService,
-    /** New BuilderBot provider — used for all new sessions */
     private readonly builderbotProvider: BuilderbotProviderService,
     private readonly qrService: QrService,
     private readonly qrEvents: QrEventsService,

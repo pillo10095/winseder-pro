@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { WASocket } from '@whiskeysockets/baileys';
 
 import { RuleAction } from '../entities/automation-rule.entity';
-import { BaileysClientService } from '../../whatsapp/services/baileys-client.service';
+import { BuilderbotProviderService } from '../../whatsapp/services/builderbot-provider.service';
 import { AiAgentService } from '../../ai/services/ai-agent.service';
 import { IntentClassifierService } from '../../ai/services/intent-classifier.service';
 import { HotLeadDetectorService } from '../../ai/services/hot-lead-detector.service';
@@ -21,7 +21,7 @@ export class AiActionService {
   private readonly logger = new Logger(AiActionService.name);
 
   constructor(
-    private readonly baileysClient: BaileysClientService,
+    private readonly botProvider: BuilderbotProviderService,
     private readonly aiAgent: AiAgentService,
     private readonly classifier: IntentClassifierService,
     private readonly hotLead: HotLeadDetectorService,
@@ -103,6 +103,6 @@ export class AiActionService {
   }
 
   private getSocket(sessionId: string): WASocket | undefined {
-    return this.baileysClient.getSocket(sessionId);
+    return this.botProvider.getSocket(sessionId);
   }
 }

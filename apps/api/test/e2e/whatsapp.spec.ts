@@ -7,7 +7,7 @@ import { ConfigService } from '@nestjs/config';
 
 import { SessionStatusController } from '@/modules/whatsapp/controllers/session-status.controller';
 import { SessionManagerService } from '@/modules/whatsapp/services/session-manager.service';
-import { BaileysClientService } from '@/modules/whatsapp/services/baileys-client.service';
+import { BuilderbotProviderService } from '@/modules/whatsapp/services/builderbot-provider.service';
 import { QrEventsService } from '@/modules/whatsapp/services/qr-events.service';
 import { QrService } from '@/modules/whatsapp/services/qr.service';
 import { MessageHandlerService } from '@/modules/whatsapp/services/message-handler.service';
@@ -45,10 +45,11 @@ describe('WhatsApp E2E', () => {
     update: jest.fn().mockResolvedValue(undefined),
   };
 
-  const mockBaileysClient = {
-    createSocket: jest.fn().mockResolvedValue(undefined),
-    endSocket: jest.fn(),
+  const mockBotProvider = {
+    createSession: jest.fn().mockResolvedValue(undefined),
+    endSession: jest.fn(),
     hasActiveSocket: jest.fn().mockReturnValue(true),
+    getConnectedSessions: jest.fn().mockReturnValue([]),
   };
 
   const mockWhatsAppGateway = {
@@ -65,7 +66,7 @@ describe('WhatsApp E2E', () => {
       providers: [
         SessionManagerService,
         { provide: SessionRepository, useValue: mockSessionRepo },
-        { provide: BaileysClientService, useValue: mockBaileysClient },
+        { provide: BuilderbotProviderService, useValue: mockBotProvider },
         { provide: QrEventsService, useValue: {} },
         { provide: QrService, useValue: {} },
         { provide: MessageHandlerService, useValue: {} },
@@ -91,7 +92,7 @@ describe('WhatsApp E2E', () => {
 
       expect(session).toBeDefined();
       expect(session.session_name).toBe('Test Session');
-      expect(mockBaileysClient.createSocket).toHaveBeenCalledWith(session.id, 'company-1');
+      expect(mockBotProvider.createSession).toHaveBeenCalledWith(session.id, 'company-1');
     });
 
     it('should throw when creating duplicate active session', async () => {

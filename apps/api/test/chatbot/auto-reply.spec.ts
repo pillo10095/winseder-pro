@@ -4,12 +4,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AutoReplyService } from '@/modules/chatbot/services/auto-reply.service';
 import { AiActionService } from '@/modules/chatbot/services/ai-action.service';
 import { AiHookService } from '@/modules/chatbot/services/ai-hook.service';
-import { BaileysClientService } from '@/modules/whatsapp/services/baileys-client.service';
+import { BuilderbotProviderService } from '@/modules/whatsapp/services/builderbot-provider.service';
 import { RuleAction } from '@/modules/chatbot/entities/automation-rule.entity';
 
 describe('AutoReplyService', () => {
   let service: AutoReplyService;
-  let baileysClient: jest.Mocked<BaileysClientService>;
+  let botProvider: jest.Mocked<Pick<BuilderbotProviderService, 'getSocket'>>;
   let aiHook: jest.Mocked<AiHookService>;
 
   const mockSocket = {
@@ -17,7 +17,7 @@ describe('AutoReplyService', () => {
   };
 
   beforeEach(async () => {
-    baileysClient = {
+    botProvider = {
       getSocket: jest.fn().mockReturnValue(mockSocket),
     } as any;
 
@@ -28,7 +28,7 @@ describe('AutoReplyService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AutoReplyService,
-        { provide: BaileysClientService, useValue: baileysClient },
+        { provide: BuilderbotProviderService, useValue: botProvider },
         { provide: AiHookService, useValue: aiHook },
         { provide: AiActionService, useValue: { executeAction: jest.fn() } },
       ],
@@ -86,7 +86,7 @@ describe('AutoReplyService', () => {
     });
 
     it('should return false if socket not found', async () => {
-      baileysClient.getSocket.mockReturnValue(undefined);
+      botProvider.getSocket.mockReturnValue(undefined);
 
       const result = await service.execute({
         ...baseRequest,

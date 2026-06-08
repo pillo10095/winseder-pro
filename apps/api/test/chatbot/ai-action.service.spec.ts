@@ -2,7 +2,7 @@ jest.mock('@whiskeysockets/baileys', () => ({}));
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { AiActionService } from '@/modules/chatbot/services/ai-action.service';
-import { BaileysClientService } from '@/modules/whatsapp/services/baileys-client.service';
+import { BuilderbotProviderService } from '@/modules/whatsapp/services/builderbot-provider.service';
 import { AiAgentService } from '@/modules/ai/services/ai-agent.service';
 import { IntentClassifierService } from '@/modules/ai/services/intent-classifier.service';
 import { HotLeadDetectorService } from '@/modules/ai/services/hot-lead-detector.service';
@@ -10,7 +10,7 @@ import { AiLogRepository } from '@/modules/ai/repositories/ai-log.repository';
 
 describe('AiActionService', () => {
   let service: AiActionService;
-  let baileysClient: jest.Mocked<BaileysClientService>;
+  let botProvider: jest.Mocked<Pick<BuilderbotProviderService, 'getSocket'>>;
   let aiAgent: jest.Mocked<AiAgentService>;
   let classifier: jest.Mocked<IntentClassifierService>;
   let hotLead: jest.Mocked<HotLeadDetectorService>;
@@ -29,7 +29,7 @@ describe('AiActionService', () => {
   };
 
   beforeEach(async () => {
-    baileysClient = {
+    botProvider = {
       getSocket: jest.fn().mockReturnValue(mockSocket),
     } as any;
 
@@ -52,7 +52,7 @@ describe('AiActionService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AiActionService,
-        { provide: BaileysClientService, useValue: baileysClient },
+        { provide: BuilderbotProviderService, useValue: botProvider },
         { provide: AiAgentService, useValue: aiAgent },
         { provide: IntentClassifierService, useValue: classifier },
         { provide: HotLeadDetectorService, useValue: hotLead },
@@ -99,7 +99,7 @@ describe('AiActionService', () => {
       });
 
       it('should return false when socket is not found', async () => {
-        baileysClient.getSocket.mockReturnValue(undefined);
+        botProvider.getSocket.mockReturnValue(undefined);
         aiAgent.chat.mockResolvedValue({ reply: 'Reply' });
 
         const result = await service.execute({

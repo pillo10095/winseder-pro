@@ -14,9 +14,7 @@ import { ContactSyncService } from './services/contact-sync.service';
 import { SessionRepository } from './repositories/session.repository';
 import { MessageRepository } from './repositories/message.repository';
 import { ConversationRepository } from './repositories/conversation.repository';
-import { BaileysClientService } from './services/baileys-client.service';
 import { BaileysAuthService } from './services/baileys-auth.service';
-import { BaileysReconnectService } from './services/baileys-reconnect.service';
 import { BuilderbotProviderService } from './services/builderbot-provider.service';
 import { QrService } from './services/qr.service';
 import { QrEventsService } from './services/qr-events.service';
@@ -53,9 +51,7 @@ import { WhatsAppGateway } from './gateways/whatsapp.gateway';
     MessageRepository,
     ConversationRepository,
     // Services
-    BaileysClientService,
     BaileysAuthService,
-    BaileysReconnectService,
     BuilderbotProviderService,
     QrService,
     QrEventsService,
@@ -69,7 +65,7 @@ import { WhatsAppGateway } from './gateways/whatsapp.gateway';
     WhatsAppGateway,
   ],
   exports: [
-    BaileysClientService,
+    BuilderbotProviderService,
     SessionManagerService,
     SessionRepository,
     ConversationRepository,

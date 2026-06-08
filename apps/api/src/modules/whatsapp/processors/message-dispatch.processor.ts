@@ -3,7 +3,7 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import Bottleneck from 'bottleneck';
 
-import { BaileysClientService } from '../services/baileys-client.service';
+import { BuilderbotProviderService } from '../services/builderbot-provider.service';
 import { SessionRepository } from '../repositories/session.repository';
 import { CampaignContactRepository } from '../../campaigns/repositories/campaign-contact.repository';
 import { CampaignRepository } from '../../campaigns/repositories/campaign.repository';
@@ -29,7 +29,7 @@ export class MessageDispatchProcessor extends WorkerHost {
   private readonly limiters = new Map<string, Bottleneck>();
 
   constructor(
-    private readonly baileysClientService: BaileysClientService,
+    private readonly botProvider: BuilderbotProviderService,
     private readonly sessionRepository: SessionRepository,
     private readonly campaignContactRepo: CampaignContactRepository,
     private readonly campaignRepo: CampaignRepository,
@@ -54,8 +54,8 @@ export class MessageDispatchProcessor extends WorkerHost {
       // 2. Get or create a rate limiter for this session
       const limiter = this.getLimiter(session.id);
 
-      // 3. Get the Baileys socket for this session
-      const sock = this.baileysClientService.getSocket(session.id);
+      // 3. Get the WhatsApp socket for this session
+      const sock = this.botProvider.getSocket(session.id);
       if (!sock) {
         this.logger.warn(
           `[MessageDispatch] Campaña ${campaignId}: socket no disponible para sesión ${session.id}`,
