@@ -2,31 +2,30 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const publicPaths = ["/login", "/register", "/forgot-password"];
-const protectedPrefixes = ["/dashboard", "/settings", "/campaigns", "/contacts", "/automations"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const isStaticFile =
+  // Always allow static assets and API routes
+  if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
     pathname.startsWith("/static") ||
-    /\.(ico|png|jpg|jpeg|svg|css|js|woff2?)$/.test(pathname);
-
-  if (isStaticFile) {
+    /\.(ico|png|jpg|jpeg|svg|css|js|woff2?)$/.test(pathname)
+  ) {
     return NextResponse.next();
   }
 
   const sessionCookie = request.cookies.get("session")?.value;
   const isAuthenticated = !!sessionCookie;
 
+  // Authenticated users on public paths → redirect to dashboard
   if (isAuthenticated && publicPaths.includes(pathname)) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  const isProtected = protectedPrefixes.some((prefix) => pathname.startsWith(prefix));
-
-  if (!isAuthenticated && isProtected) {
+  // Everything else is protected — redirect unauthenticated users to login
+  if (!isAuthenticated && !publicPaths.includes(pathname)) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);

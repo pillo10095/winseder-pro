@@ -33,6 +33,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
       <div className="flex justify-end">
         <div className="max-w-[75%] rounded-2xl rounded-br-sm bg-green-100 px-4 py-2 shadow-sm">
           {message.type === 'image' && message.media_url && (
+            /* eslint-disable-next-line @next/next/no-img-element */
             <img
               src={message.media_url}
               alt="Shared image"
@@ -59,6 +60,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
     <div className="flex justify-start">
       <div className="max-w-[75%] rounded-2xl rounded-bl-sm bg-white px-4 py-2 shadow-sm">
         {message.type === 'image' && message.media_url && (
+          /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={message.media_url}
             alt="Received image"

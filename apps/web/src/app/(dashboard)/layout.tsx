@@ -1,21 +1,7 @@
-import { CrmSidebar } from '../../components/crm/crm-sidebar';
+import type { ReactNode } from "react";
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex h-screen bg-white">
-      {/* Sidebar */}
-      <aside className="w-56 shrink-0 border-r border-gray-200 bg-gray-50">
-        <CrmSidebar />
-      </aside>
+import { DashboardShell } from "@/components/layouts/dashboard-shell";
 
-      {/* Main content */}
-      <main className="flex-1 overflow-auto">
-        {children}
-      </main>
-    </div>
-  );
+export default function DashboardLayout({ children }: { children: ReactNode }) {
+  return <DashboardShell>{children}</DashboardShell>;
 }

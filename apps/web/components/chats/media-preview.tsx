@@ -20,6 +20,7 @@ export function MediaPreview({ url, type, onClose }: MediaPreviewProps) {
         </button>
 
         {type === 'image' && (
+          /* eslint-disable-next-line @next/next/no-img-element */
           <img src={url} alt="Preview" className="max-h-[85vh] rounded-lg object-contain" />
         )}
         {type === 'video' && (

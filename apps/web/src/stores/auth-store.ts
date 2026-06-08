@@ -117,6 +117,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     ls?.removeItem("refresh_token");
     ls?.removeItem("user");
 
+    // Clear session cookie so middleware stops letting us through
+    document.cookie = "session=; path=/; max-age=0; SameSite=Lax";
+
     set({
       token: null,
       refreshToken: null,

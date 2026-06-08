@@ -1,4 +1,7 @@
+'use client';
+
 import * as React from "react";
+import { usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -10,7 +13,6 @@ import { UserMenu } from "@/src/components/layout/user-menu";
 type SidebarItem = {
   label: string;
   href: string;
-  isActive?: boolean;
 };
 
 export interface DashboardShellProps {
@@ -19,17 +21,24 @@ export interface DashboardShellProps {
 }
 
 const defaultSidebarItems: SidebarItem[] = [
-  { label: "Panel", href: "/", isActive: true },
+  { label: "Panel", href: "/" },
   { label: "WhatsApp", href: "/whatsapp" },
+  { label: "CRM", href: "/crm/pipeline" },
   { label: "Campañas", href: "/campaigns" },
-  { label: "Contactos", href: "/contacts" },
   { label: "Automatizaciones", href: "/automations" },
   { label: "IA", href: "/settings/ai" },
   { label: "Anti-Ban", href: "/anti-ban" },
 ];
 
 export function DashboardShell({ sidebar, children }: DashboardShellProps) {
+  const pathname = usePathname();
   const items = sidebar ?? defaultSidebarItems;
+
+  const isActive = (href: string) => {
+    if (href === "/") return pathname === "/";
+    if (href === "/crm/pipeline") return pathname.startsWith("/crm");
+    return pathname.startsWith(href);
+  };
 
   return (
     <div className="flex min-h-[100dvh] bg-background">
@@ -48,21 +57,24 @@ export function DashboardShell({ sidebar, children }: DashboardShellProps) {
         <Separator />
 
         <nav className="flex flex-col gap-1 p-4">
-          {items.map(({ label, href, isActive }) => (
-            <Button
-              key={href}
-              asChild
-              variant={isActive ? "default" : "ghost"}
-              className={cn(
-                "justify-start text-sm font-medium",
-                isActive
-                  ? "bg-primary text-primary-foreground shadow-constructivist"
-                  : "text-muted-foreground hover:text-primary",
-              )}
-            >
-              <a href={href}>{label}</a>
-            </Button>
-          ))}
+          {items.map(({ label, href }) => {
+            const active = isActive(href);
+            return (
+              <Button
+                key={href}
+                asChild
+                variant={active ? "default" : "ghost"}
+                className={cn(
+                  "justify-start text-sm font-medium",
+                  active
+                    ? "bg-primary text-primary-foreground shadow-constructivist"
+                    : "text-muted-foreground hover:text-primary",
+                )}
+              >
+                <a href={href}>{label}</a>
+              </Button>
+            );
+          })}
         </nav>
 
         {/* Footer — date/time + logout */}

@@ -13,6 +13,7 @@ export type Campaign = {
   read_count: number;
   failed_count: number;
   total_count: number;
+  trigger_event?: { type: string; stage_id: string } | null;
   completed_at?: string;
   template?: { id: string; name: string };
   created_at: string;
@@ -101,9 +102,23 @@ export function useCampaigns() {
     return true;
   }, []);
 
+  const setTriggerEvent = useCallback(async (id: string, triggerEvent: { type: string; stage_id: string } | null) => {
+    const res = await fetchWithAuth(`${API_URL}/campaigns/${id}/trigger`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ trigger_event: triggerEvent }),
+    });
+    if (!res.ok) throw new Error('Failed to set trigger');
+    const updated = await res.json();
+    setCurrent(updated);
+    setCampaigns((prev) => prev.map((c) => (c.id === id ? updated : c)));
+    return updated;
+  }, []);
+
   return {
     campaigns, total, loading, error, current,
     fetchCampaigns, fetchCampaignById,
     createCampaign, startCampaign, pauseCampaign, cancelCampaign,
+    setTriggerEvent,
   };
 }

@@ -28,7 +28,8 @@ const AvatarImage = React.forwardRef<HTMLImageElement, AvatarImageProps>(functio
 ) {
   const { className, ...rest } = props;
   return (
-    <img ref={ref} className={cn("size-full object-cover", className)} loading="lazy" {...rest} />
+    // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
+    <img ref={ref} alt="" className={cn("size-full object-cover", className)} loading="lazy" {...rest} />
   );
 });
 

@@ -89,6 +89,7 @@ export default function WhatsAppConnectPage() {
 
         {status === 'qr_ready' && qrDataUrl && (
           <div className="text-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={qrDataUrl}
               alt="WhatsApp QR Code"

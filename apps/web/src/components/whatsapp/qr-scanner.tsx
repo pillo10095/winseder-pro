@@ -8,6 +8,7 @@ export function QrScanner({ qrDataUrl, status, onRefresh }: QrScannerProps) {
   if (status === 'qr_ready' && qrDataUrl) {
     return (
       <div className="flex flex-col items-center gap-4">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={qrDataUrl}
           alt="WhatsApp QR"
