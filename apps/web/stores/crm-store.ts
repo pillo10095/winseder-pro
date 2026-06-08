@@ -70,15 +70,19 @@ export const useCRMStore = create<CRMState>((set, get) => ({
     const previous = get().leads;
     // Optimistic update
     set(state => ({
-      leads: state.leads.map(l =>
-        l.id === dealId
-          ? {
-              ...l,
-              pipeline_stage_id: newStageKey,
-              pipeline_stage: { ...l.pipeline_stage, id: newStageKey },
-            }
-          : l
-      ),
+      leads: state.leads.map(l => {
+        if (l.id !== dealId) return l;
+
+        const updatedStage = l.pipeline_stage
+          ? { ...l.pipeline_stage, id: newStageKey }
+          : undefined;
+
+        return {
+          ...l,
+          pipeline_stage_id: newStageKey,
+          pipeline_stage: updatedStage,
+        };
+      }),
     }));
     try {
       await api.movePipelineLead(dealId, newStageKey);

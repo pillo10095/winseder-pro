@@ -1,5 +1,7 @@
 import type { PipelineLead, PipelineStats, PipelineFilters } from '@/types/crm';
 
+export type { PipelineLead, PipelineStats, PipelineFilters };
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 function getHeaders(): Record<string, string> {

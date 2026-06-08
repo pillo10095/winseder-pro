@@ -31,8 +31,8 @@ export default function ContactsPage() {
           <button
             onClick={() => exportToCsv(
               'contacts',
-              ['Name', 'Email', 'Phone', 'Company', 'Source'],
-              contacts.map((c) => [c.name, c.email || '', c.phone || '', c.company_name || '', c.source || '']),
+              ['Name', 'Email', 'Phone', 'Company', 'Source', 'Labels'],
+              contacts.map((c: any) => [c.name, c.email || '', c.phone || '', c.company_name || '', c.source || '', c.labels?.map((l: any) => l.name).join(', ') || '']),
             )}
             className="flex items-center gap-2 rounded-sm border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-muted-light transition-colors"
           >
@@ -72,6 +72,7 @@ export default function ContactsPage() {
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Email</th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Phone</th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Company</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Labels</th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Source</th>
               <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">Actions</th>
             </tr>
@@ -79,12 +80,12 @@ export default function ContactsPage() {
           <tbody className="divide-y divide-border bg-card">
             {contacts.length === 0 && !loading ? (
               <tr>
-                <td colSpan={5} className="px-6 py-12 text-center text-sm text-muted-foreground">
+                <td colSpan={7} className="px-6 py-12 text-center text-sm text-muted-foreground">
                   No contacts found
                 </td>
               </tr>
             ) : (
-              contacts.map((contact) => (
+              contacts.map((contact: any) => (
                 <tr key={contact.id} className="cursor-pointer hover:bg-muted-light transition-colors">
                   <td className="px-6 py-4">
                     <Link
@@ -97,6 +98,24 @@ export default function ContactsPage() {
                   <td className="px-6 py-4 text-sm text-muted-foreground">{contact.email || '—'}</td>
                   <td className="px-6 py-4 text-sm text-muted-foreground">{contact.phone || '—'}</td>
                   <td className="px-6 py-4 text-sm text-muted-foreground">{contact.company_name || '—'}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-wrap gap-1">
+                      {contact.labels && contact.labels.length > 0
+                        ? contact.labels.slice(0, 3).map((label: any) => (
+                            <span
+                              key={label.id}
+                              className="inline-flex items-center rounded-sm px-1.5 py-0.5 text-[10px] font-medium"
+                              style={{ backgroundColor: label.color + '20', color: label.color }}
+                            >
+                              {label.name}
+                            </span>
+                          ))
+                        : null}
+                      {contact.labels && contact.labels.length > 3 && (
+                        <span className="text-[10px] text-muted-foreground">+{contact.labels.length - 3}</span>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-6 py-4 text-sm text-muted-foreground">{contact.source || '—'}</td>
                   <td className="px-6 py-4 text-right">
                     <button

@@ -11,6 +11,7 @@ export type Contact = {
   source?: string;
   role?: string;
   notes?: string;
+  labels?: { id: string; name: string; color: string }[];
   created_at?: string;
 };
 
@@ -54,7 +55,8 @@ export function useContacts() {
     try {
       const res = await fetchWithAuth(`${API_URL}/crm/contacts/${id}`);
       if (!res.ok) throw new Error('Contact not found');
-      const data = await res.json();
+      const body = await res.json();
+      const data = body.data ?? body;
       setCurrent(data);
       return data as Contact;
     } catch (err) {
@@ -75,7 +77,8 @@ export function useContacts() {
       });
 
       if (!res.ok) throw new Error('Failed to create contact');
-      const contact = await res.json();
+      const body = await res.json();
+      const contact = body.data ?? body;
       setContacts((prev) => [contact, ...prev]);
       setTotal((t) => t + 1);
       return contact;

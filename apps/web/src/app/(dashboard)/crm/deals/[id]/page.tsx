@@ -35,21 +35,6 @@ export default function DealDetailPage({ params }: { params: { id: string } }) {
     }
   }, [current?.id, fetchActivities]);
 
-  const handleStageChange = useCallback(
-    async (stageId: string) => {
-      if (!current) return;
-
-      if (stageId === '5' || stageId === '6') {
-        const stage = stages.find((s) => s.id === stageId);
-        setShowWonLost({ targetStageId: stageId, targetStageName: stage?.name || '' });
-        return;
-      }
-
-      await doStageChange(stageId);
-    },
-    [current, stages],
-  );
-
   const doStageChange = useCallback(
     async (stageId: string, reason?: string) => {
       if (!current) return;
@@ -71,6 +56,21 @@ export default function DealDetailPage({ params }: { params: { id: string } }) {
       fetchActivities('current', undefined, undefined, current.id);
     },
     [current, stages, createActivity, fetchDealById, fetchActivities],
+  );
+
+  const handleStageChange = useCallback(
+    async (stageId: string) => {
+      if (!current) return;
+
+      if (stageId === '5' || stageId === '6') {
+        const stage = stages.find((s) => s.id === stageId);
+        setShowWonLost({ targetStageId: stageId, targetStageName: stage?.name || '' });
+        return;
+      }
+
+      await doStageChange(stageId);
+    },
+    [current, stages, doStageChange],
   );
 
   const handleProbabilityChange = useCallback(

@@ -3,13 +3,16 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 
+import { LabelPicker } from './label-picker';
+
 interface ContactFormProps {
-  initial?: { name: string; email: string; phone: string; company_name: string; role: string; source: string; notes: string };
+  initial?: { name: string; email: string; phone: string; company_name: string; role: string; source: string; notes: string; labelIds?: string[] };
   onClose: () => void;
   onSave: (data: any) => void;
+  companyId?: string;
 }
 
-export function ContactForm({ initial, onClose, onSave }: ContactFormProps) {
+export function ContactForm({ initial, onClose, onSave, companyId = 'current' }: ContactFormProps) {
   const [name, setName] = useState(initial?.name ?? '');
   const [email, setEmail] = useState(initial?.email ?? '');
   const [phone, setPhone] = useState(initial?.phone ?? '');
@@ -17,6 +20,7 @@ export function ContactForm({ initial, onClose, onSave }: ContactFormProps) {
   const [role, setRole] = useState(initial?.role ?? '');
   const [source, setSource] = useState(initial?.source ?? '');
   const [notes, setNotes] = useState(initial?.notes ?? '');
+  const [labelIds, setLabelIds] = useState<string[]>(initial?.labelIds ?? []);
 
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/30">
@@ -100,6 +104,8 @@ export function ContactForm({ initial, onClose, onSave }: ContactFormProps) {
             </select>
           </div>
 
+          <LabelPicker companyId={companyId} value={labelIds} onChange={setLabelIds} />
+
           <div>
             <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Notes</label>
             <textarea
@@ -120,7 +126,7 @@ export function ContactForm({ initial, onClose, onSave }: ContactFormProps) {
             Cancel
           </button>
           <button
-            onClick={() => onSave({ name, email: email || undefined, phone: phone || undefined, company_name: companyName || undefined, role: role || undefined, source: source || undefined, notes: notes || undefined })}
+            onClick={() => onSave({ name, email: email || undefined, phone: phone || undefined, company_name: companyName || undefined, role: role || undefined, source: source || undefined, notes: notes || undefined, labelIds: labelIds.length > 0 ? labelIds : undefined })}
             disabled={!name.trim()}
             className="rounded-sm bg-primary px-4 py-2 text-sm text-primary-foreground hover:brightness-110 transition-all disabled:opacity-50"
           >

@@ -57,6 +57,7 @@ export interface PipelineContact {
   source?: string;
   notes?: string;
   company_name?: string;
+  labels?: Array<{ id: string; name: string; color: string }>;
 }
 
 export interface PipelineUser {
@@ -70,6 +71,9 @@ export interface PipelineLead {
   name: string;
   value: number;
   company_name?: string;
+  ultima_actividad?: string;
+  fecha_ultimo_contacto?: string;
+  fecha_creacion?: string;
   probability: number;
   close_date?: string;
   pipeline_stage_id: string;

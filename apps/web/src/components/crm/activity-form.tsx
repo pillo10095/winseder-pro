@@ -5,14 +5,16 @@ import { X } from 'lucide-react';
 
 interface ActivityFormProps {
   onClose: () => void;
-  onSave: (data: { type: string; description: string; contact_id?: string; deal_id?: string }) => void;
+  onSave: (data: { type: string; description: string; contact_id?: string; deal_id?: string; activity_date?: string }) => void;
+  initialDate?: string;
 }
 
 const TYPES = ['call', 'email', 'meeting', 'note', 'task'];
 
-export function ActivityForm({ onClose, onSave }: ActivityFormProps) {
+export function ActivityForm({ onClose, onSave, initialDate }: ActivityFormProps) {
   const [type, setType] = useState('note');
   const [description, setDescription] = useState('');
+  const [date, setDate] = useState(initialDate ?? '');
 
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/30">
@@ -39,6 +41,16 @@ export function ActivityForm({ onClose, onSave }: ActivityFormProps) {
           </div>
 
           <div>
+            <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="mt-1 w-full rounded-sm border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+            />
+          </div>
+
+          <div>
             <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Description</label>
             <textarea
               value={description}
@@ -58,7 +70,7 @@ export function ActivityForm({ onClose, onSave }: ActivityFormProps) {
             Cancel
           </button>
           <button
-            onClick={() => onSave({ type, description })}
+            onClick={() => onSave({ type, description, activity_date: date || undefined })}
             className="rounded-sm bg-primary px-4 py-2 text-sm text-primary-foreground hover:brightness-110 transition-all"
           >
             Save

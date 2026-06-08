@@ -32,7 +32,7 @@ export default function DealsPage() {
   }, [fetchDeals, fetchStages, search]);
 
   const filtered = deals.filter(
-    (d) =>
+    (d: any) =>
       d.name.toLowerCase().includes(search.toLowerCase()) ||
       (d.company_name && d.company_name.toLowerCase().includes(search.toLowerCase())),
   );
@@ -45,7 +45,7 @@ export default function DealsPage() {
           <p className="mt-1 text-sm text-muted-foreground">
             {loading
               ? 'Loading...'
-              : `${filtered.length} deals · $${filtered.reduce((s, d) => s + d.value, 0).toLocaleString()} total`}
+              : `${filtered.length} deals · $${filtered.reduce((s: number, d: any) => s + d.value, 0).toLocaleString()} total`}
           </p>
         </div>
         <div className="flex gap-2">
@@ -53,7 +53,7 @@ export default function DealsPage() {
             onClick={() => exportToCsv(
               'deals',
               ['Name', 'Value', 'Stage', 'Company', 'Close Date', 'Assigned'],
-              filtered.map((d) => [
+              filtered.map((d: any) => [
                 d.name,
                 d.value.toString(),
                 STAGE_NAMES[d.pipeline_stage_id] || 'Unknown',
@@ -112,7 +112,7 @@ export default function DealsPage() {
                 </td>
               </tr>
             ) : (
-              filtered.map((deal) => (
+              filtered.map((deal: any) => (
                 <tr key={deal.id} className="cursor-pointer hover:bg-muted-light transition-colors">
                   <td className="px-6 py-4">
                     <Link

@@ -15,7 +15,7 @@ export default function CompaniesPage() {
   }, [fetchCompanies]);
 
   const filtered = companies.filter(
-    (c) =>
+    (c: any) =>
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       (c.industry && c.industry.toLowerCase().includes(search.toLowerCase())),
   );
@@ -72,7 +72,7 @@ export default function CompaniesPage() {
                 </td>
               </tr>
             ) : (
-              filtered.map((company) => (
+              filtered.map((company: any) => (
                 <tr key={company.id} className="cursor-pointer hover:bg-muted-light transition-colors">
                   <td className="px-6 py-4 font-medium text-primary">
                     {company.name}

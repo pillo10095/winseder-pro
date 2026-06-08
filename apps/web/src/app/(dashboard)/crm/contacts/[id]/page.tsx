@@ -66,6 +66,19 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
             <p className="text-sm text-muted-foreground">
               {[current!.role, current!.company_name].filter(Boolean).join(' at ') || '—'}
             </p>
+            {current!.labels && current!.labels.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {current!.labels.map((label) => (
+                  <span
+                    key={label.id}
+                    className="inline-flex items-center rounded-sm px-2 py-0.5 text-xs font-medium"
+                    style={{ backgroundColor: label.color + '20', color: label.color, borderColor: label.color, borderWidth: 1 }}
+                  >
+                    {label.name}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
           <div className="flex gap-2">
             <button
@@ -182,6 +195,7 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
             role: current.role || '',
             source: current.source || '',
             notes: current.notes || '',
+            labelIds: current.labels?.map((l) => l.id) ?? [],
           }}
           onClose={() => setShowEditForm(false)}
           onSave={async (data) => {
