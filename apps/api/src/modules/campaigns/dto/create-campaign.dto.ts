@@ -18,6 +18,11 @@ export class CreateCampaignDto {
   @IsOptional()
   contact_ids?: string[];
 
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  whatsapp_label_names?: string[];
+
   @IsObject()
   @IsOptional()
   trigger_event?: { type: string; stage_id: string };

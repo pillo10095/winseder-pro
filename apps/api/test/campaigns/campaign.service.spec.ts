@@ -1,9 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { DataSource } from 'typeorm';
 
 import { CampaignService } from '@/modules/campaigns/services/campaign.service';
 import { CampaignRepository } from '@/modules/campaigns/repositories/campaign.repository';
 import { CampaignContactRepository } from '@/modules/campaigns/repositories/campaign-contact.repository';
+import { Contact } from '@/modules/crm/entities/contact.entity';
 import { Campaign } from '@/modules/campaigns/entities/campaign.entity';
 
 describe('CampaignService', () => {
@@ -11,6 +13,7 @@ describe('CampaignService', () => {
   let campaignRepo: jest.Mocked<CampaignRepository>;
   let campaignContactRepo: jest.Mocked<CampaignContactRepository>;
   let eventEmitter: jest.Mocked<EventEmitter2>;
+  let mockDataSource: jest.Mocked<DataSource>;
 
   const mockCampaign: Campaign = {
     id: 'campaign-1',
@@ -45,12 +48,26 @@ describe('CampaignService', () => {
 
     eventEmitter = { emit: jest.fn() } as any;
 
+    const mockQueryBuilder = {
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      getRawMany: jest.fn().mockResolvedValue([]),
+    };
+
+    mockDataSource = {
+      getRepository: jest.fn().mockReturnValue({
+        createQueryBuilder: jest.fn().mockReturnValue(mockQueryBuilder),
+      }),
+    } as any;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CampaignService,
         { provide: CampaignRepository, useValue: campaignRepo },
         { provide: CampaignContactRepository, useValue: campaignContactRepo },
         { provide: EventEmitter2, useValue: eventEmitter },
+        { provide: DataSource, useValue: mockDataSource },
       ],
     }).compile();
 
@@ -120,6 +137,65 @@ describe('CampaignService', () => {
 
       expect(campaignContactRepo.save).not.toHaveBeenCalled();
       expect(campaignRepo.update).not.toHaveBeenCalled();
+    });
+
+    it('should query contacts by whatsapp_label_names and save campaign contacts', async () => {
+      const qb = mockDataSource.getRepository(Contact).createQueryBuilder();
+      (qb.getRawMany as jest.Mock).mockResolvedValue([
+        { c_id: 'contact-1' },
+        { c_id: 'contact-2' },
+        { c_id: 'contact-3' },
+      ]);
+
+      campaignContactRepo.create.mockReturnValue([
+        { campaign_id: 'campaign-1', contact_id: 'contact-1' },
+        { campaign_id: 'campaign-1', contact_id: 'contact-2' },
+        { campaign_id: 'campaign-1', contact_id: 'contact-3' },
+      ]);
+
+      await service.create('company-1', {
+        name: 'Campaign from Labels',
+        whatsapp_label_names: ['LEADS DICIEMBRE', 'LEADS ENERO 2026'],
+      });
+
+      expect(mockDataSource.getRepository).toHaveBeenCalledWith(Contact);
+      expect(qb.where).toHaveBeenCalledWith('c.company_id = :companyId', { companyId: 'company-1' });
+      expect(qb.andWhere).toHaveBeenCalled();
+      expect(qb.getRawMany).toHaveBeenCalled();
+      expect(campaignContactRepo.create).toHaveBeenCalledWith([
+        { campaign_id: 'campaign-1', contact_id: 'contact-1' },
+        { campaign_id: 'campaign-1', contact_id: 'contact-2' },
+        { campaign_id: 'campaign-1', contact_id: 'contact-3' },
+      ]);
+      expect(campaignContactRepo.save).toHaveBeenCalled();
+      expect(campaignRepo.update).toHaveBeenCalledWith('campaign-1', { total_count: 3 });
+    });
+
+    it('should deduplicate contacts when contact_ids and whatsapp_label_names overlap', async () => {
+      // contact-1 comes from both manual contact_ids and label query
+      const qb = mockDataSource.getRepository(Contact).createQueryBuilder();
+      (qb.getRawMany as jest.Mock).mockResolvedValue([
+        { c_id: 'contact-1' },
+        { c_id: 'contact-2' },
+      ]);
+
+      campaignContactRepo.create.mockReturnValue([
+        { campaign_id: 'campaign-1', contact_id: 'contact-1' },
+        { campaign_id: 'campaign-1', contact_id: 'contact-3' },
+      ]);
+
+      await service.create('company-1', {
+        name: 'Merged Campaign',
+        contact_ids: ['contact-1', 'contact-3'],
+        whatsapp_label_names: ['LEADS DICIEMBRE'],
+      });
+
+      expect(campaignContactRepo.create).toHaveBeenCalledWith([
+        { campaign_id: 'campaign-1', contact_id: 'contact-1' },
+        { campaign_id: 'campaign-1', contact_id: 'contact-3' },
+        { campaign_id: 'campaign-1', contact_id: 'contact-2' },
+      ]);
+      expect(campaignRepo.update).toHaveBeenCalledWith('campaign-1', { total_count: 3 });
     });
   });
 

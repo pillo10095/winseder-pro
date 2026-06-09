@@ -7,8 +7,10 @@ import {
   Body,
   Param,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CompanyId } from '../../../common/decorators/company-id.decorator';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { DealService } from '../services/deal.service';
@@ -18,6 +20,7 @@ import { MoveDealDto } from '../dto/move-deal.dto';
 import type { QueryPipelineDto } from '../dto/query-pipeline.dto';
 
 @Controller('crm/pipeline')
+@UseGuards(JwtAuthGuard)
 export class PipelineLeadsController {
   constructor(private readonly dealService: DealService) {}
 

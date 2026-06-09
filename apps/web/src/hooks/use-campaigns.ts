@@ -19,6 +19,15 @@ export type Campaign = {
   created_at: string;
 };
 
+export type CreateCampaignDto = {
+  name: string;
+  template_id?: string;
+  scheduled_at?: string;
+  contact_ids?: string[];
+  whatsapp_label_names?: string[];
+  trigger_event?: { type: string; stage_id: string } | null;
+};
+
 export function useCampaigns() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [total, setTotal] = useState(0);
@@ -59,7 +68,7 @@ export function useCampaigns() {
     }
   }, []);
 
-  const createCampaign = useCallback(async (dto: Partial<Campaign>) => {
+  const createCampaign = useCallback(async (dto: CreateCampaignDto) => {
     const res = await fetchWithAuth(`${API_URL}/campaigns`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -122,3 +131,5 @@ export function useCampaigns() {
     setTriggerEvent,
   };
 }
+
+

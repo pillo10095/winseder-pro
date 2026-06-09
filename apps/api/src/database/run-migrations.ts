@@ -1,3 +1,8 @@
+import { config } from 'dotenv';
+import { resolve } from 'path';
+
+config({ path: resolve(process.cwd(), '../../.env') });
+
 import { DataSource } from 'typeorm';
 
 import databaseConfig from '../config/database.config';

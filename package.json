@@ -29,5 +29,16 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "packageManager": "npm@10.5.0"
+  "packageManager": "npm@10.5.0",
+  "dependencies": {
+    "@fullcalendar/core": "^6.1.20",
+    "@fullcalendar/daygrid": "^6.1.20",
+    "@fullcalendar/interaction": "^6.1.20",
+    "@fullcalendar/react": "^6.1.20",
+    "@hookform/resolvers": "^3.9.1",
+    "@nestjs/common": "^10.4.22",
+    "@nestjs/swagger": "^7.4.2",
+    "@whiskeysockets/baileys": "^7.0.0-rc13",
+    "styled-jsx": "^5.1.7"
+  }
 }

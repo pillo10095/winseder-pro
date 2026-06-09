@@ -7,13 +7,16 @@ import {
   Body,
   Param,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CompanyId } from '../../../common/decorators/company-id.decorator';
 import { TemplateService } from '../services/template.service';
 import { CreateTemplateDto } from '../dto/create-template.dto';
 
 @Controller('campaigns/templates')
+@UseGuards(JwtAuthGuard)
 export class TemplateController {
   constructor(private readonly templateService: TemplateService) {}
 

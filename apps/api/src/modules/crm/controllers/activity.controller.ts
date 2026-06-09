@@ -6,14 +6,17 @@ import {
   Body,
   Param,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CompanyId } from '../../../common/decorators/company-id.decorator';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { ActivityService } from '../services/activity.service';
 import { CreateActivityDto } from '../dto/create-activity.dto';
 
 @Controller('crm/activities')
+@UseGuards(JwtAuthGuard)
 export class ActivityController {
   constructor(private readonly activityService: ActivityService) {}
 

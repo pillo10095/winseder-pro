@@ -2,13 +2,11 @@
 
 import { useCrmStore } from '../../stores/crm-store';
 import Link from 'next/link';
-import { BarChart3, User, Building2, DollarSign, ClipboardList, Tags, Calendar } from 'lucide-react';
+import { BarChart3, User, ClipboardList, Tags, Calendar } from 'lucide-react';
 
 const NAV_ITEMS = [
   { id: 'pipeline', label: 'Pipeline', icon: BarChart3, href: '/crm/pipeline' },
   { id: 'contacts', label: 'Contacts', icon: User, href: '/crm/contacts' },
-  { id: 'companies', label: 'Companies', icon: Building2, href: '/crm/companies' },
-  { id: 'deals', label: 'Deals', icon: DollarSign, href: '/crm/deals' },
   { id: 'activities', label: 'Activities', icon: ClipboardList, href: '/crm/activities' },
   { id: 'calendar', label: 'Calendar', icon: Calendar, href: '/crm/calendar' },
   { id: 'labels', label: 'Labels', icon: Tags, href: '/crm/labels' },

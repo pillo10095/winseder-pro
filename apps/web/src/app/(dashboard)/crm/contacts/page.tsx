@@ -6,17 +6,60 @@ import { useContacts } from '@/src/hooks/use-contacts';
 import { ContactForm } from '@/src/components/crm/contact-form';
 import { ConfirmDialog } from '@/src/components/crm/confirm-dialog';
 import { exportToCsv } from '@/src/lib/export-csv';
-import { Plus, Search, Trash2, Download } from 'lucide-react';
+import { API_URL, fetchWithAuth } from '@/src/lib/api';
+import { Plus, Search, Trash2, Download, Users, RefreshCw } from 'lucide-react';
 
 export default function ContactsPage() {
   const { contacts, total, loading, error, fetchContacts, createContact, deleteContact } = useContacts();
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [extracting, setExtracting] = useState(false);
+  const [extractMsg, setExtractMsg] = useState<string | null>(null);
 
   useEffect(() => {
     fetchContacts('current', search);
   }, [fetchContacts, search]);
+
+  const handleExtractContacts = async () => {
+    setExtracting(true);
+    setExtractMsg(null);
+    try {
+      const sessionsRes = await fetchWithAuth(`${API_URL}/whatsapp/sessions?status=CONNECTED`);
+      const sessionsData = await sessionsRes.json();
+      const sessions = sessionsData.data || [];
+
+      if (sessions.length === 0) {
+        setExtractMsg('No WhatsApp sessions connected');
+        return;
+      }
+
+      let totalCreated = 0;
+      let totalSkipped = 0;
+
+      for (const session of sessions) {
+        const res = await fetchWithAuth(`${API_URL}/whatsapp/sessions/${session.id}/extract-contacts`, {
+          method: 'POST',
+        });
+        const body = await res.json();
+        if (body.data) {
+          totalCreated += body.data.created || 0;
+          totalSkipped += body.data.skipped || 0;
+        }
+      }
+
+      if (totalCreated === 0 && totalSkipped === 0) {
+        setExtractMsg('No new contacts found. WhatsApp contacts are synced automatically when messages arrive or after scanning the QR. Try sending a message to a new contact first.');
+      } else {
+        setExtractMsg(`${totalCreated} contacts imported, ${totalSkipped} already in CRM`);
+      }
+      fetchContacts('current', search);
+    } catch (err: any) {
+      setExtractMsg(`Error: ${err.message}`);
+    } finally {
+      setExtracting(false);
+    }
+  };
 
   return (
     <div className="space-y-6 p-6">
@@ -28,6 +71,14 @@ export default function ContactsPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <button
+            onClick={handleExtractContacts}
+            disabled={extracting}
+            className="flex items-center gap-2 rounded-sm border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-muted-light transition-colors disabled:opacity-50"
+          >
+            {extracting ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Users className="h-4 w-4" />}
+            {extracting ? 'Extracting...' : 'Extract from WhatsApp'}
+          </button>
           <button
             onClick={() => exportToCsv(
               'contacts',
@@ -48,6 +99,12 @@ export default function ContactsPage() {
           </button>
         </div>
       </div>
+
+      {extractMsg && (
+        <div className={`rounded-sm p-3 text-sm ${extractMsg.startsWith('Error') ? 'bg-destructive/10 text-destructive' : 'bg-emerald-500/10 text-emerald-600'}`}>
+          {extractMsg}
+        </div>
+      )}
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

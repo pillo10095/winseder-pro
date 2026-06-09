@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
 
-export class Migration025CreateLabels implements MigrationInterface {
-  name = 'Migration025CreateLabels';
+export class Migration1779947974886 implements MigrationInterface {
+  name = 'Migration1779947974886';
 
   async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
@@ -39,12 +39,6 @@ export class Migration025CreateLabels implements MigrationInterface {
           { name: 'label_id', type: 'varchar', length: '36', isPrimary: true },
         ],
         foreignKeys: [
-          {
-            columnNames: ['contact_id'],
-            referencedTableName: 'contacts',
-            referencedColumnNames: ['id'],
-            onDelete: 'CASCADE',
-          },
           {
             columnNames: ['label_id'],
             referencedTableName: 'labels',

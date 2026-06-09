@@ -12,8 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
 import { API_URL, fetchWithAuth } from "@/src/lib/api";
@@ -40,11 +38,16 @@ const STATUS_VARIANTS: Record<string, string> = {
   error: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100",
 };
 
+const DEFAULT_SESSION_NAMES = [
+  "WhatsApp Principal",
+  "WhatsApp Ventas",
+  "WhatsApp Soporte",
+];
+
 export default function WhatsAppPage() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
-  const [sessionName, setSessionName] = useState("");
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [activeSession, setActiveSession] = useState<string | null>(null);
   const [polling, setPolling] = useState(false);
@@ -77,39 +80,42 @@ export default function WhatsAppPage() {
     fetchSessions();
   }, [fetchSessions]);
 
-  const createSession = async () => {
-    if (!sessionName.trim()) return;
+  // Auto-create a session if none exist
+  useEffect(() => {
+    if (loading || creating || sessions.length > 0) return;
+
+    const namesInUse = new Set(sessions.map((s) => s.name));
+    const name = DEFAULT_SESSION_NAMES.find((n) => !namesInUse.has(n))
+      ?? `WhatsApp ${new Date().toLocaleDateString("es-AR")} - ${Date.now()}`;
+
     setCreating(true);
-    setError(null);
-    setQrCode(null);
 
-    try {
-      const res = await fetchWithAuth(`${API_URL}/whatsapp/sessions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ session_name: sessionName.trim() }),
-      });
+    fetchWithAuth(`${API_URL}/whatsapp/sessions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_name: name }),
+    })
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
+        const data = await res.json();
+        const id = data.data?.id ?? data.id;
+        setActiveSession(id);
+        setPolling(true);
+        await fetchSessions();
+      })
+      .catch((e: any) => setError(e.message))
+      .finally(() => setCreating(false));
+  }, [loading, sessions]);
 
-      if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        let details = "";
-        try { const j = JSON.parse(text); details = j?.error?.message ?? j?.message ?? text.slice(0, 200) } catch { details = text.slice(0, 200) }
-        throw new Error(details || `Error HTTP ${res.status}`);
-      }
-
-      const data = await res.json();
-      const sessionId = data.data?.id ?? data.id;
-
-      setActiveSession(sessionId);
-      setSessionName("");
+  // Auto-show QR for the first session that needs scanning
+  useEffect(() => {
+    if (loading || activeSession || sessions.length === 0) return;
+    const needsQr = sessions.find((s) => s.status === "connecting" || s.status === "error");
+    if (needsQr) {
+      setActiveSession(needsQr.id);
       setPolling(true);
-      await fetchSessions();
-    } catch (e: any) {
-      setError(e.message);
-    } finally {
-      setCreating(false);
     }
-  };
+  }, [loading, sessions, activeSession]);
 
   const fetchQr = useCallback(async () => {
     if (!activeSession) return;
@@ -131,6 +137,10 @@ export default function WhatsAppPage() {
             setQrCode(null);
             setActiveSession(null);
             fetchSessions();
+            // Trigger contact extraction automatically
+            fetchWithAuth(`${API_URL}/whatsapp/sessions/${activeSession}/extract-contacts`, {
+              method: "POST",
+            }).catch(() => {});
           }
         }
       }
@@ -174,34 +184,6 @@ export default function WhatsAppPage() {
       </section>
 
       <Separator className="divider-constructivist" />
-
-      {/* Create session */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Nueva sesión</CardTitle>
-          <CardDescription>
-            Ingresá un nombre para identificar la sesión (ej: &quot;Ventas&quot;, &quot;Soporte&quot;).
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-end gap-4">
-            <div className="flex-1 space-y-2">
-              <Label htmlFor="session-name">Nombre de la sesión</Label>
-              <Input
-                id="session-name"
-                placeholder="Ej: Ventas principal"
-                value={sessionName}
-                onChange={(e) => setSessionName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && createSession()}
-              />
-            </div>
-            <Button onClick={createSession} disabled={creating || !sessionName.trim()}>
-              {creating ? "Creando..." : "Crear sesión"}
-            </Button>
-          </div>
-          {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-        </CardContent>
-      </Card>
 
       {/* QR display */}
       {polling && activeSession && (
@@ -250,10 +232,7 @@ export default function WhatsAppPage() {
                 <span className="text-xs font-bold text-muted-foreground/50">{'//'}</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                No hay sesiones de WhatsApp.
-              </p>
-              <p className="text-xs text-muted-foreground/60">
-                Creá una sesión nueva para empezar.
+                Creando sesión de WhatsApp…
               </p>
             </div>
           ) : (

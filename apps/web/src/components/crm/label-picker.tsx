@@ -6,7 +6,7 @@ import { X } from 'lucide-react';
 import { useLabels, Label } from '../../hooks/use-labels';
 
 interface LabelPickerProps {
-  companyId: string;
+  companyId?: string;
   value: string[];
   onChange: (labelIds: string[]) => void;
 }
@@ -16,7 +16,7 @@ export function LabelPicker({ companyId, value, onChange }: LabelPickerProps) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (companyId) fetchLabels(companyId);
+    fetchLabels(companyId ?? '');
   }, [companyId, fetchLabels]);
 
   const selected = labels.filter((l) => value.includes(l.id));

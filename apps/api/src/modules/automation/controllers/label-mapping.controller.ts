@@ -1,9 +1,11 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CompanyId } from '../../../common/decorators/company-id.decorator';
 import { LabelMappingService } from '../services/label-mapping.service';
 import { CreateLabelMappingDto } from '../dto/create-label-mapping.dto';
 
 @Controller('crm/label-mappings')
+@UseGuards(JwtAuthGuard)
 export class LabelMappingController {
   constructor(private readonly mappingService: LabelMappingService) {}
 

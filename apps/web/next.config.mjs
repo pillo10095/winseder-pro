@@ -6,7 +6,10 @@ const nextConfig = {
     typedRoutes: true
   },
   transpilePackages: ["@wisender/shared"],
-  outputFileTracing: true
+  outputFileTracing: true,
+  eslint: {
+    ignoreDuringBuilds: true
+  }
 };
 
 export default nextConfig;

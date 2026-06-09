@@ -6,13 +6,16 @@ import {
   Delete,
   Body,
   Param,
+  UseGuards,
 } from '@nestjs/common';
 
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CompanyId } from '../../../common/decorators/company-id.decorator';
 import { PipelineService } from '../services/pipeline.service';
 import { CreatePipelineStageDto } from '../dto/create-pipeline.dto';
 
 @Controller('crm/pipeline-stages')
+@UseGuards(JwtAuthGuard)
 export class PipelineController {
   constructor(private readonly pipelineService: PipelineService) {}
 

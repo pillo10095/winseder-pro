@@ -26,12 +26,6 @@ export class Migration1779947965886 implements MigrationInterface {
             onDelete: 'CASCADE',
           },
           {
-            columnNames: ['contact_id'],
-            referencedTableName: 'contacts',
-            referencedColumnNames: ['id'],
-            onDelete: 'SET NULL',
-          },
-          {
             columnNames: ['deal_id'],
             referencedTableName: 'deals',
             referencedColumnNames: ['id'],

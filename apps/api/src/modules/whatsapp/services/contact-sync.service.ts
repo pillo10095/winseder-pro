@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 
+import { ContactRepository } from '../../crm/repositories/contact.repository';
 import { Contact } from '../../crm/entities/contact.entity';
 
 export interface SyncResult {
@@ -19,8 +18,7 @@ export class ContactSyncService {
   private readonly logger = new Logger(ContactSyncService.name);
 
   constructor(
-    @InjectRepository(Contact)
-    private readonly contactRepo: Repository<Contact>,
+    private readonly contactRepo: ContactRepository,
   ) {}
 
   /**
@@ -36,7 +34,9 @@ export class ContactSyncService {
     let skipped = 0;
 
     for (const entry of contacts) {
-      if (!entry.id || !entry.id.endsWith('@s.whatsapp.net')) continue;
+      if (!entry.id) continue;
+      const isIndividual = entry.id.endsWith('@s.whatsapp.net') || entry.id.endsWith('@lid');
+      if (!isIndividual) continue;
 
       const phone = entry.id.split('@')[0];
       if (!phone) continue;
@@ -84,7 +84,9 @@ export class ContactSyncService {
     let skipped = 0;
 
     for (const entry of contacts) {
-      if (!entry.id || !entry.id.endsWith('@s.whatsapp.net')) continue;
+      if (!entry.id) continue;
+      const isIndividual = entry.id.endsWith('@s.whatsapp.net') || entry.id.endsWith('@lid');
+      if (!isIndividual) continue;
 
       const phone = entry.id.split('@')[0];
       if (!phone) continue;
@@ -176,6 +178,32 @@ export class ContactSyncService {
     }
 
     return contact;
+  }
+
+  /**
+   * Get ALL contacts that have ever been synced from WhatsApp for a company.
+   * Used as fallback when in-memory knownContacts is empty (after restart).
+   */
+  async getExistingWaContacts(companyId: string): Promise<WaContactEntry[]> {
+    // Use the same query builder that the CRM module uses (proven to work)
+    const [contacts] = await this.contactRepo.findByCompanyId(companyId);
+
+    if (contacts.length === 0) {
+      this.logger.log(`[getExistingWaContacts] 0 contacts for company ${companyId}`);
+      return [];
+    }
+
+    const withWaId = contacts.filter((c) => !!c.wa_id);
+    this.logger.log(
+      `[getExistingWaContacts] ${contacts.length} total, ${withWaId.length} with wa_id`,
+    );
+
+    // Use wa_id if available, otherwise construct JID from phone number.
+    // syncByWaIds matches by both wa_id AND phone, so either will work.
+    return contacts.map((c) => ({
+      id: c.wa_id || `${c.phone}@s.whatsapp.net`,
+      name: c.name ?? undefined,
+    }));
   }
 
   /**

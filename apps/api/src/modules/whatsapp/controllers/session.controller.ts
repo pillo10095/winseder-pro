@@ -62,4 +62,10 @@ export class SessionController {
     const result = await this.sessionManager.checkHealth(id);
     return { data: result };
   }
+
+  @Post(':id/extract-contacts')
+  async extractContacts(@Param('id') id: string, @Req() req: Request) {
+    const result = await this.sessionManager.extractContacts(id, req.companyId!);
+    return { data: result };
+  }
 }

@@ -7,8 +7,10 @@ import {
   Body,
   Param,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CompanyId } from '../../../common/decorators/company-id.decorator';
 import { CampaignService } from '../services/campaign.service';
 import { CsvImportService } from '../services/csv-import.service';
@@ -17,6 +19,7 @@ import { CreateCampaignDto } from '../dto/create-campaign.dto';
 import { ImportCsvDto } from '../dto/import-csv.dto';
 
 @Controller('campaigns')
+@UseGuards(JwtAuthGuard)
 export class CampaignController {
   constructor(
     private readonly campaignService: CampaignService,

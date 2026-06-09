@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { AuthModule } from '../auth/auth.module';
 import { Template } from './entities/template.entity';
 import { Campaign } from './entities/campaign.entity';
 import { CampaignContact } from './entities/campaign-contact.entity';
@@ -22,6 +23,7 @@ import { CampaignController } from './controllers/campaign.controller';
   imports: [
     TypeOrmModule.forFeature([Template, Campaign, CampaignContact]),
     BullModule.registerQueue({ name: 'campaign-dispatch' }),
+    AuthModule,
   ],
   controllers: [
     TemplateController,

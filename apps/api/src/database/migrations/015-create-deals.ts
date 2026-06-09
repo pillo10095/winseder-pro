@@ -35,12 +35,6 @@ export class Migration1779947964886 implements MigrationInterface {
             referencedColumnNames: ['id'],
             onDelete: 'RESTRICT',
           },
-          {
-            columnNames: ['contact_id'],
-            referencedTableName: 'contacts',
-            referencedColumnNames: ['id'],
-            onDelete: 'SET NULL',
-          },
         ],
       }),
     );

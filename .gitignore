@@ -17,3 +17,21 @@ winseder-pro/
 *.err
 *.out
 .atl/*.cache.json
+
+# Logs and output
+api-err.txt
+api-out.txt
+api.log.err
+api.log.out
+*.api-err.log
+*.api-out.log
+*.dev-*.log
+web.log
+*.web-err.log
+*.web-out.log
+
+# Redis binary distribution (local dev)
+redis5/
+
+# Scripts
+start-dev.bat

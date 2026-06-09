@@ -41,7 +41,7 @@ export class Session {
   @Column({ type: 'varchar', length: 20, nullable: true })
   phone_number!: string | null;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'longtext', nullable: true })
   auth_state!: string | null;
 
   @Column({ type: 'datetime', nullable: true })

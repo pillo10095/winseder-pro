@@ -13,7 +13,7 @@ export class Migration1779947973886 implements MigrationInterface {
             type: 'varchar',
             isPrimary: true,
             generationStrategy: 'uuid',
-            default: 'uuid_generate_v4()',
+            default: '(UUID())',
           },
           {
             name: 'action',

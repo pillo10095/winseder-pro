@@ -1,11 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CompanyId } from '../../../common/decorators/company-id.decorator';
 import { CreateLabelDto } from '../dtos/create-label.dto';
 import { UpdateLabelDto } from '../dtos/update-label.dto';
 import { LabelService } from '../services/label.service';
 
 @Controller('crm/labels')
+@UseGuards(JwtAuthGuard)
 export class LabelController {
   constructor(private readonly labelService: LabelService) {}
 

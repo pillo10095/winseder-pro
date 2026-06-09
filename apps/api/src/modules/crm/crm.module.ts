@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { AuthModule } from '../auth/auth.module';
+
 // Entities
 import { Contact } from './entities/contact.entity';
 import { Deal } from './entities/deal.entity';
@@ -40,6 +42,7 @@ import { PipelineLeadsController } from './controllers/pipeline-leads.controller
       Label,
       PipelineStage,
     ]),
+    AuthModule,
   ],
   controllers: [
     ContactController,
@@ -68,6 +71,7 @@ import { PipelineLeadsController } from './controllers/pipeline-leads.controller
   exports: [
     ContactRepository,
     DealRepository,
+    LabelRepository,
     PipelineStageRepository,
   ],
 })

@@ -1,9 +1,11 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CompanyId } from '../../../common/decorators/company-id.decorator';
 import { AutomationRuleService } from '../services/automation-rule.service';
 import { CreateAutomationRuleDto } from '../dto/create-automation-rule.dto';
 
 @Controller('crm/automation-rules')
+@UseGuards(JwtAuthGuard)
 export class AutomationRuleController {
   constructor(private readonly ruleService: AutomationRuleService) {}
 

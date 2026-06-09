@@ -51,19 +51,24 @@ export class SessionManagerService implements OnModuleInit {
 
   private async restoreSessions(): Promise<void> {
     try {
-      const connected = await this.sessionRepository.findByStatus(SessionStatus.CONNECTED);
-      if (connected.length === 0) {
-        this.logger.log('No connected sessions to restore');
+      const toRestore = await this.sessionRepository.find({
+        where: [
+          { status: SessionStatus.CONNECTED },
+          { status: SessionStatus.CONNECTING },
+          { status: SessionStatus.QR_CODE },
+        ],
+      });
+      if (toRestore.length === 0) {
+        this.logger.log('No sessions to restore');
         return;
       }
 
-      this.logger.log(`Restoring ${connected.length} session(s)...`);
-      for (const session of connected) {
+      this.logger.log(`Restoring ${toRestore.length} session(s)...`);
+      for (const session of toRestore) {
         this.logger.log(`Reconnecting session ${session.id} (${session.session_name})`);
         await this.sessionRepository.update(session.id, {
           status: SessionStatus.CONNECTING,
         });
-        // Use new BuilderBot provider for all session restores
         this.builderbotProvider.createSession(session.id, session.company_id).catch((err) => {
           this.logger.error(`Failed to restore session ${session.id}: ${err.message}`);
         });
@@ -103,15 +108,16 @@ export class SessionManagerService implements OnModuleInit {
    * Get all sessions for a company.
    */
   async getSessions(companyId: string, status?: string): Promise<Session[]> {
-    if (status && Object.values(SessionStatus).includes(status as SessionStatus)) {
-      return this.sessionRepository.find({
-        where: { company_id: companyId, status: status as SessionStatus },
-        order: { created_at: 'DESC' },
-      });
+    const where: any = { company_id: companyId };
+
+    if (status && status !== 'all') {
+      if (Object.values(SessionStatus).includes(status as SessionStatus)) {
+        where.status = status as SessionStatus;
+      }
     }
-    // Por defecto solo sesiones CONNECTED
+
     return this.sessionRepository.find({
-      where: { company_id: companyId, status: SessionStatus.CONNECTED },
+      where,
       order: { created_at: 'DESC' },
     });
   }

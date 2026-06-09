@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
+import { Contact } from '../../crm/entities/contact.entity';
 import { Campaign } from '../entities/campaign.entity';
 import { CampaignRepository } from '../repositories/campaign.repository';
 import { CampaignContactRepository } from '../repositories/campaign-contact.repository';
@@ -14,6 +17,7 @@ export class CampaignService {
     private readonly campaignRepo: CampaignRepository,
     private readonly campaignContactRepo: CampaignContactRepository,
     private readonly eventEmitter: EventEmitter2,
+    @InjectDataSource() private readonly dataSource: DataSource,
   ) {}
 
   async create(companyId: string, dto: CreateCampaignDto): Promise<Campaign> {
@@ -27,8 +31,45 @@ export class CampaignService {
       }),
     );
 
+    const contactIds = new Set<string>();
+
+    // Add contacts from manual contact_ids
     if (dto.contact_ids?.length) {
-      const campaignContacts = dto.contact_ids.map((contactId) => ({
+      for (const id of dto.contact_ids) {
+        contactIds.add(id);
+      }
+    }
+
+    // Add contacts from whatsapp_label_names
+    if (dto.whatsapp_label_names?.length) {
+      const qb = this.dataSource
+        .getRepository(Contact)
+        .createQueryBuilder('c')
+        .where('c.company_id = :companyId', { companyId })
+        .andWhere('c.whatsapp_labels IS NOT NULL');
+
+      const conditions = dto.whatsapp_label_names.map((_, i) => {
+        return `FIND_IN_SET(:label_${i}, c.whatsapp_labels) > 0`;
+      });
+      const params = dto.whatsapp_label_names.reduce(
+        (acc, name, i) => {
+          acc[`label_${i}`] = name;
+          return acc;
+        },
+        {} as Record<string, string>,
+      );
+
+      qb.andWhere(`(${conditions.join(' OR ')})`, params);
+      qb.select('c.id');
+
+      const labelContacts = await qb.getRawMany<{ c_id: string }>();
+      for (const row of labelContacts) {
+        contactIds.add(row.c_id);
+      }
+    }
+
+    if (contactIds.size > 0) {
+      const campaignContacts = Array.from(contactIds).map((contactId) => ({
         campaign_id: campaign.id,
         contact_id: contactId,
       }));
@@ -36,7 +77,7 @@ export class CampaignService {
         this.campaignContactRepo.create(campaignContacts),
       );
       await this.campaignRepo.update(campaign.id, {
-        total_count: dto.contact_ids.length,
+        total_count: contactIds.size,
       });
     }
 

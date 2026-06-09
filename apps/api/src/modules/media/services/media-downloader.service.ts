@@ -69,7 +69,7 @@ export class MediaDownloaderService {
         storageKey,
         mimeType,
         fileSize: buffer.length,
-        signedUrl,
+        signedUrl: signedUrl ?? undefined,
       };
 
       // Dimensions

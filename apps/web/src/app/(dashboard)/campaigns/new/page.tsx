@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,19 +8,29 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCampaigns } from '@/src/hooks/use-campaigns';
 import { useTemplates } from '@/src/hooks/use-templates';
+import { useLabels } from '@/src/hooks/use-labels';
+import { LabelPicker } from '@/src/components/crm/label-picker';
 
 export default function NewCampaignPage() {
   const router = useRouter();
   const { createCampaign } = useCampaigns();
   const { templates, fetchTemplates } = useTemplates();
+  const { labels, fetchLabels } = useLabels();
   const [name, setName] = useState('');
   const [templateId, setTemplateId] = useState('');
   const [scheduledAt, setScheduledAt] = useState('');
+  const [selectedLabelIds, setSelectedLabelIds] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     fetchTemplates();
-  }, [fetchTemplates]);
+    fetchLabels('');
+  }, [fetchTemplates, fetchLabels]);
+
+  const whatsappLabelNames = useMemo(
+    () => labels.filter((l) => selectedLabelIds.includes(l.id)).map((l) => l.name),
+    [labels, selectedLabelIds],
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +42,7 @@ export default function NewCampaignPage() {
         name: name.trim(),
         template_id: templateId || undefined,
         scheduled_at: scheduledAt || undefined,
+        whatsapp_label_names: whatsappLabelNames.length > 0 ? whatsappLabelNames : undefined,
       });
       router.push(`/campaigns/${campaign.id}`);
     } catch (err) {
@@ -93,6 +104,20 @@ export default function NewCampaignPage() {
                 onChange={(e) => setScheduledAt(e.target.value)}
               />
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Audiencia</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground mb-3">
+              Seleccioná las etiquetas de WhatsApp para incluir todos los contactos que tengan
+              al menos una de ellas. Si se sincronizan nuevas etiquetas desde WhatsApp,
+              aparecerán acá automáticamente.
+            </p>
+            <LabelPicker value={selectedLabelIds} onChange={setSelectedLabelIds} />
           </CardContent>
         </Card>
 

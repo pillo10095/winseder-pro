@@ -9,6 +9,7 @@ import { SessionRepository } from '../repositories/session.repository';
 import { MediaDownloaderService } from '../../media/services/media-downloader.service';
 import { MediaThumbnailService } from '../../media/services/media-thumbnail.service';
 import { Media } from '../../media/entities/media.entity';
+import { ContactRepository } from '../../crm/repositories/contact.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -34,6 +35,7 @@ export class MessageHandlerService {
     private readonly mediaDownloader: MediaDownloaderService,
     private readonly mediaThumbnail: MediaThumbnailService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly contactRepo: ContactRepository,
     @InjectRepository(Media)
     private readonly mediaRepo: Repository<Media>,
   ) {}
@@ -108,6 +110,31 @@ export class MessageHandlerService {
         unread_count: fromMe ? 0 : undefined,
       },
     );
+
+    // Auto-create a CRM contact for individual JIDs
+    const isIndividual = remoteJid.endsWith('@s.whatsapp.net') || remoteJid.endsWith('@lid');
+    if (isIndividual && companyId) {
+      const phone = remoteJid.split('@')[0];
+      if (phone) {
+        const existing = await this.contactRepo.findOne({
+          where: [
+            { wa_id: remoteJid, company_id: companyId },
+            { phone, company_id: companyId },
+          ],
+        });
+        if (!existing) {
+          await this.contactRepo.save(
+            this.contactRepo.create({
+              name: msg.pushName || phone,
+              phone,
+              wa_id: remoteJid,
+              source: 'whatsapp',
+              company_id: companyId,
+            }),
+          );
+        }
+      }
+    }
 
     // Check for duplicate (Baileys can fire duplicate events)
     const existing = await this.messageRepository.findBySessionAndMessageId(

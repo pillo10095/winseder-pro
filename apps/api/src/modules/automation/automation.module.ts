@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bullmq';
+
+import { AuthModule } from '../auth/auth.module';
 import { AutomationRule } from './entities/automation-rule.entity';
 import { WhatsappLabelMapping } from './entities/whatsapp-label-mapping.entity';
 import { AutomationRuleRepository } from './repositories/automation-rule.repository';
@@ -21,6 +23,7 @@ import { CampaignsModule } from '../campaigns/campaigns.module';
   imports: [
     TypeOrmModule.forFeature([AutomationRule, WhatsappLabelMapping]),
     BullModule.registerQueue({ name: 'automation' }),
+    AuthModule,
     CrmModule,
     CampaignsModule,
   ],

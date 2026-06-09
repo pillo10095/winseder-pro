@@ -4,7 +4,6 @@ import { useEffect, useCallback, useState } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { useContacts } from '@/src/hooks/use-contacts';
-import { useDeals } from '@/src/hooks/use-deals';
 import { useActivities } from '@/src/hooks/use-activities';
 import { ActivityForm } from '@/src/components/crm/activity-form';
 import { ActivityTimeline } from '@/src/components/crm/activity-timeline';
@@ -14,7 +13,6 @@ import { ArrowLeft, Trash2 } from 'lucide-react';
 
 export default function ContactDetailPage({ params }: { params: { id: string } }) {
   const { current, currentLoading, fetchContactById, updateContact, deleteContact } = useContacts();
-  const { deals, fetchDeals } = useDeals();
   const { activities, fetchActivities, createActivity } = useActivities();
   const [showActivityForm, setShowActivityForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
@@ -26,10 +24,9 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
 
   useEffect(() => {
     if (current?.id) {
-      fetchDeals('current', undefined, undefined, current.company_name);
       fetchActivities('current', undefined, current.id);
     }
-  }, [current?.id, current?.company_name, fetchDeals, fetchActivities]);
+  }, [current?.id, fetchActivities]);
 
   const handleLogActivity = useCallback(
     async (data: { type: string; description: string }) => {
@@ -121,26 +118,6 @@ export default function ContactDetailPage({ params }: { params: { id: string } }
             <p className="mt-1 text-sm text-foreground">{current!.notes}</p>
           </div>
         )}
-      </div>
-
-      <div className="rounded-sm border border-border bg-card p-6">
-        <h2 className="text-lg font-medium text-foreground">Linked Deals</h2>
-        <div className="mt-3 space-y-2">
-          {deals.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No linked deals</p>
-          ) : (
-            deals.map((deal) => (
-              <Link
-                key={deal.id}
-                href={`/crm/deals/${deal.id}`}
-                className="flex items-center justify-between rounded-sm px-4 py-2 text-sm bg-muted-light hover:bg-muted-light/80 transition-colors"
-              >
-                <span className="text-foreground">{deal.name}</span>
-                <span className="font-medium text-foreground">${deal.value.toLocaleString()}</span>
-              </Link>
-            ))
-          )}
-        </div>
       </div>
 
       <div className="rounded-sm border border-border bg-card p-6">

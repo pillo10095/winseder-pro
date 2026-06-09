@@ -79,6 +79,9 @@ export class CustomBaileysProvider {
   /** Callback to persist Baileys credentials to the database */
   private saveCreds: (() => Promise<void>) | null = null;
 
+  /** Optional callback to register raw Baileys events right after socket creation */
+  private onVendorReady: ((vendor: WASocket) => void) | null = null;
+
   constructor(
     private readonly getAuthState: () => Promise<{
       state: AuthenticationState;
@@ -89,6 +92,15 @@ export class CustomBaileysProvider {
     public readonly usePairingCode = false,
     public readonly phoneNumber: string | null = null,
   ) {}
+
+  /**
+   * Set a callback to be called right after the Baileys socket is created,
+   * before the initial app-state sync completes. Use this to register
+   * event handlers that must catch the initial sync events.
+   */
+  setOnVendorReady(cb: (vendor: WASocket) => void): void {
+    this.onVendorReady = cb;
+  }
 
   // ── Lifecycle ────────────────────────────────────────────────────────
 
@@ -127,6 +139,9 @@ export class CustomBaileysProvider {
       });
 
       this.vendor = sock;
+
+      // Fire callback so upstream can register raw events BEFORE app-state sync
+      this.onVendorReady?.(sock);
 
       // --- Credentials persistence ------------------------------------------------
       sock.ev.on('creds.update', async () => {
