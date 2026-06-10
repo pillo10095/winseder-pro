@@ -116,7 +116,7 @@ export class SessionManagerService implements OnModuleInit {
    * Get all sessions for a company.
    */
   async getSessions(companyId: string, status?: string): Promise<Session[]> {
-    const where: any = { company_id: companyId };
+    const where: FindOptionsWhere<Session> = { company_id: companyId };
 
     if (status && status !== 'all') {
       if (Object.values(SessionStatus).includes(status as SessionStatus)) {

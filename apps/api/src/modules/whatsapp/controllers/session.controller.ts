@@ -14,7 +14,6 @@ import { Request } from 'express';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CreateSessionDto } from '../dto/create-session.dto';
 import { SessionManagerService } from '../services/session-manager.service';
-import { SessionStatus } from '../entities/session.entity';
 
 @Controller('whatsapp/sessions')
 @UseGuards(JwtAuthGuard)

@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { CompanyId } from '../../../common/decorators/company-id.decorator';
+
 import { InboxService } from '../services/inbox.service';
 import { AssignConversationDto } from '../dto/assign-conversation.dto';
 import { UpdateConversationStatusDto } from '../dto/update-conversation-status.dto';

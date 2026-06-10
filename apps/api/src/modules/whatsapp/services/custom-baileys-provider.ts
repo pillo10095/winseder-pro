@@ -127,7 +127,9 @@ export class CustomBaileysProvider {
         printQRInTerminal: false,
         syncFullHistory: false,
         generateHighQualityLinkPreview: true,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Baileys internal cache type
         msgRetryCounterCache: this.msgRetryCounterCache as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Baileys internal cache type
         userDevicesCache: this.userDevicesCache as any,
         getMessage: this.getMessage.bind(this),
         shouldIgnoreJid: (jid: string) => {
@@ -266,6 +268,7 @@ export class CustomBaileysProvider {
 
     // 2. Fall back to signal repository lidMapping
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Baileys internal signalRepository
       const mapping = (this.vendor as any)?.signalRepository?.lidMapping;
       if (mapping?.getPNForLID) {
         const pn = await mapping.getPNForLID(lid);
@@ -319,7 +322,15 @@ export class CustomBaileysProvider {
 
   private makeLogger() {
     const logger = this.logger;
-    const bridge: any = {
+    const bridge: {
+      trace(msg?: unknown): void;
+      debug(msg?: unknown): void;
+      info(msg?: unknown): void;
+      warn(msg?: unknown): void;
+      error(msg?: unknown): void;
+      fatal(msg?: unknown): void;
+      child(): typeof bridge;
+    } = {
       trace: () => {},
       debug: (msg: unknown) => { if (typeof msg === 'string') logger.debug(msg); },
       info: (msg: unknown) => { if (typeof msg === 'string') logger.log(msg); },

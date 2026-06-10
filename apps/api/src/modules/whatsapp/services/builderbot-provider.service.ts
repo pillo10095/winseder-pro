@@ -4,7 +4,7 @@ import { SessionRepository } from '../repositories/session.repository';
 import { BaileysAuthService } from './baileys-auth.service';
 import { ContactSyncService } from './contact-sync.service';
 import { ConversationRepository } from '../repositories/conversation.repository';
-import { QrEventsService, QrGeneratedEvent } from './qr-events.service';
+import { QrEventsService } from './qr-events.service';
 import { QrService } from './qr.service';
 import { MessageHandlerService } from './message-handler.service';
 import { extractAndCacheLidFromMessage } from '@builderbot/provider-baileys';
@@ -12,6 +12,15 @@ import { CustomBaileysProvider } from './custom-baileys-provider';
 import { ContactRepository } from '../../crm/repositories/contact.repository';
 import { LabelRepository } from '../../crm/repositories/label.repository';
 import { In } from 'typeorm';
+
+/** Baileys WASocket internal properties not in the public type. */
+interface InternalSock {
+  resyncAppState?(collections: readonly string[], isInitialSync: boolean): Promise<void>;
+  authState?: { keys?: { set?(data: Record<string, unknown>): Promise<void> } };
+  ev?: { flush?(): void };
+}
+
+const toInternal = (sock: unknown): InternalSock => sock as InternalSock;
 
 /** Check if a JID belongs to an individual contact (not a group or broadcast) */
 const isIndividualJid = (jid?: string | null): boolean =>
@@ -117,7 +126,7 @@ export class BuilderbotProviderService implements OnApplicationShutdown {
     );
 
     // --- High-level events from CustomBaileysProvider ---
-    provider.events.on('require_action', async (data: any) => {
+    provider.events.on('require_action', async (data: { payload?: { qr?: string; code?: string } }) => {
       if (data.payload?.qr) {
         this.logger.log(`QR received for session ${sessionId}`);
         const qrDataUrl = await this.qrService.generateQrDataUrl(data.payload.qr);
@@ -223,6 +232,7 @@ export class BuilderbotProviderService implements OnApplicationShutdown {
 
         // Extract LID→PN mapping from each incoming message and cache it
         try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- @builderbot/provider-baileys type mismatch
           await extractAndCacheLidFromMessage(provider.lidCache, msg as any);
         } catch {
           // Silently ignore — LID caching is best-effort
@@ -412,9 +422,7 @@ export class BuilderbotProviderService implements OnApplicationShutdown {
       return;
     }
 
-    const resyncFn = (sock as any).resyncAppState as
-      | ((collections: readonly string[], isInitialSync: boolean) => Promise<void>)
-      | undefined;
+    const resyncFn = toInternal(sock).resyncAppState;
 
     if (!resyncFn) {
       this.logger.warn(`[${sessionId}] resyncAppState not available on socket`);
@@ -427,7 +435,7 @@ export class BuilderbotProviderService implements OnApplicationShutdown {
       // per chat-utils.js:590. Like phonebook contacts, after the initial sync
       // the version is current and resync produces no events.
       // Reset version to 0 to force a full snapshot from WhatsApp.
-      const keys = (sock as any).authState.keys;
+      const keys = toInternal(sock).authState?.keys;
       if (keys?.set) {
         await keys.set({
           'app-state-sync-version': {
@@ -467,9 +475,7 @@ export class BuilderbotProviderService implements OnApplicationShutdown {
       return;
     }
 
-    const resyncFn = (sock as any).resyncAppState as
-      | ((collections: readonly string[], isInitialSync: boolean) => Promise<void>)
-      | undefined;
+    const resyncFn = toInternal(sock).resyncAppState;
     if (!resyncFn) {
       this.logger.warn(`[${sessionId}] syncPhonebookContacts: resyncAppState not available`);
       return;
@@ -483,7 +489,7 @@ export class BuilderbotProviderService implements OnApplicationShutdown {
       // Force a full snapshot by resetting the stored version.
       // With version=0, resyncAppState requests return_snapshot=true from WhatsApp,
       // which re-delivers ALL contactAction mutations — including the full phonebook.
-      const keys = (sock as any).authState.keys;
+      const keys = toInternal(sock).authState?.keys;
       if (keys?.set) {
         await keys.set({
           'app-state-sync-version': {
@@ -496,7 +502,7 @@ export class BuilderbotProviderService implements OnApplicationShutdown {
       await resyncFn(['critical_unblock_low'], true);
 
       // contacts.upsert is BUFFERABLE, so events were buffered. Flush now.
-      const ev = (sock as any).ev;
+      const ev = toInternal(sock).ev;
       if (ev?.flush) {
         ev.flush();
       }

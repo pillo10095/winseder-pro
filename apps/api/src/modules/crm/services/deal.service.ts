@@ -90,6 +90,13 @@ export class DealService {
     by_stage: { stage_name: string; stage_color: string; count: number; value: number }[];
   }> {
     // Single query: totals + per-stage breakdown + won detection
+    interface RawStage {
+      stage_name: string;
+      stage_color: string;
+      sort_order: string;
+      count: string;
+      value: string;
+    }
     const byStage = await this.dealRepo.createQueryBuilder('deal')
       .leftJoin('deal.pipeline_stage', 'stage')
       .where('deal.company_id = :companyId', { companyId })
@@ -105,15 +112,15 @@ export class DealService {
       .orderBy('MAX(stage.sort_order)', 'ASC')
       .getRawMany();
 
-    const totalDeals = byStage.reduce((sum: number, s: any) => sum + Number(s.count || 0), 0);
-    const totalValue = byStage.reduce((sum: number, s: any) => sum + Number(s.value || 0), 0);
+    const totalDeals = byStage.reduce((sum: number, s: RawStage) => sum + Number(s.count || 0), 0);
+    const totalValue = byStage.reduce((sum: number, s: RawStage) => sum + Number(s.value || 0), 0);
 
     const wonTotal = byStage
-      .filter((s: any) => {
+      .filter((s: RawStage) => {
         const name = (s.stage_name ?? '').toLowerCase();
         return name.includes('ganado') || name.includes('won');
       })
-      .reduce((sum: number, s: any) => sum + Number(s.count || 0), 0);
+      .reduce((sum: number, s: RawStage) => sum + Number(s.count || 0), 0);
 
     const conversionRate = totalDeals > 0 ? (wonTotal / totalDeals) * 100 : 0;
 
@@ -122,7 +129,7 @@ export class DealService {
       total_value: totalValue,
       avg_value: totalDeals > 0 ? Math.round(totalValue / totalDeals) : 0,
       conversion_rate: Math.round(conversionRate * 100) / 100,
-      by_stage: byStage.map((s: any) => ({
+      by_stage: byStage.map((s: RawStage) => ({
         stage_name: s.stage_name,
         stage_color: s.stage_color,
         count: Number(s.count) || 0,

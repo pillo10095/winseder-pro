@@ -204,13 +204,13 @@ export class ContactSyncService {
       );
     }
 
-    const labels: string[] = (contact.whatsapp_labels ?? []) as string[];
+    const labels = contact.whatsapp_labels ?? [];
     if (!labels.includes(labelName)) {
       labels.push(labelName);
       await this.contactRepo.update(contact.id, {
         whatsapp_labels: labels,
-      } as any);
-      (contact as any).whatsapp_labels = labels;
+      });
+      contact.whatsapp_labels = labels;
     }
 
     return contact;
@@ -267,7 +267,7 @@ export class ContactSyncService {
       labels.splice(idx, 1);
       await this.contactRepo.update(contact.id, {
         whatsapp_labels: labels,
-      } as any);
+      });
     }
   }
 }
