@@ -16,7 +16,7 @@ coverage/
 winseder-pro/
 *.err
 *.out
-.atl/*.cache.json
+*.cache.json
 
 # Logs and output
 api-err.txt
@@ -32,6 +32,13 @@ web.log
 
 # Redis binary distribution (local dev)
 redis5/
+
+# Test artifacts
+testsprite_tests/tmp/
+testsprite_tests/backup_corrected/
+
+# Local storage
+apps/api/storage/
 
 # Scripts
 start-dev.bat
