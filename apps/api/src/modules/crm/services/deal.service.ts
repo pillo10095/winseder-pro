@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import type { DeepPartial } from 'typeorm';
 
 import { Deal } from '../entities/deal.entity';
+import { ActivityType } from '../entities/activity.entity';
 import { DealRepository } from '../repositories/deal.repository';
 import { ActivityService } from './activity.service';
 import { CreateDealDto } from '../dto/create-deal.dto';
@@ -67,7 +68,7 @@ export class DealService {
       try {
         await this.activityService.create(deal.company_id, userId, {
           deal_id: id,
-          type: 'system' as any,
+          type: ActivityType.SYSTEM,
           description: reason
             ? `Movido a nueva etapa: ${reason}`
             : 'Etapa actualizada',

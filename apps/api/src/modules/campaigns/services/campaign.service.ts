@@ -87,7 +87,8 @@ export class CampaignService {
 
     this.eventEmitter.emit('campaign.created', { campaignId: campaign.id });
 
-    return this.campaignRepo.findOne({ where: { id: campaign.id }, relations: ['template'] }) as Promise<Campaign>;
+    const saved = await this.campaignRepo.findOne({ where: { id: campaign.id }, relations: ['template'] });
+    return saved!;
   }
 
   async findByCompanyId(
@@ -143,6 +144,7 @@ export class CampaignService {
     const campaign = await this.findById(id);
     if (!campaign) throw new Error('Campaign not found');
     await this.campaignRepo.update(id, { trigger_event: triggerEvent });
-    return this.findById(id) as Promise<Campaign>;
+    const updated = await this.findById(id);
+    return updated!;
   }
 }
