@@ -1,10 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import { ActivityFeed } from '@/components/crm/activities/activity-feed';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 
 export default function ActivitiesPage() {
+  const [refreshKey, setRefreshKey] = useState(0);
+
   return (
     <div className="space-y-6">
       {/* Page header */}
@@ -18,7 +21,7 @@ export default function ActivitiesPage() {
         <Button
           size="sm"
           variant="outline"
-          onClick={() => window.location.reload()}
+          onClick={() => setRefreshKey(k => k + 1)}
         >
           <RefreshCw className="mr-1 size-3.5" />
           Actualizar
@@ -30,7 +33,7 @@ export default function ActivitiesPage() {
         <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
           Recientes
         </h3>
-        <ActivityFeed limit={20} />
+        <ActivityFeed limit={20} refreshKey={refreshKey} />
       </div>
     </div>
   );

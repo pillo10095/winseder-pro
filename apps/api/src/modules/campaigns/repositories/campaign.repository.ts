@@ -27,10 +27,16 @@ export class CampaignRepository extends Repository<Campaign> {
     return qb.getManyAndCount();
   }
 
-  async findScheduledDue(): Promise<Campaign[]> {
-    return this.createQueryBuilder('c')
+  async findScheduledDue(companyId?: string): Promise<Campaign[]> {
+    const qb = this.createQueryBuilder('c')
+      .leftJoinAndSelect('c.template', 'template')
       .where('c.status = :status', { status: 'scheduled' })
-      .andWhere('c.scheduled_at <= NOW()')
-      .getMany();
+      .andWhere('c.scheduled_at <= NOW()');
+
+    if (companyId) {
+      qb.andWhere('c.company_id = :companyId', { companyId });
+    }
+
+    return qb.getMany();
   }
 }

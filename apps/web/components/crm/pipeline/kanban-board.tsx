@@ -13,7 +13,7 @@ import {
 import { KanbanColumn } from './kanban-column';
 import { LeadCard } from './lead-card';
 import { LeadDetailDialog } from './lead-detail-dialog';
-import { useCRMStore } from '@/stores/crm-store';
+import { useCRMStore } from '@/stores/pipeline-store';
 import { PIPELINE_STAGES, getLeadStageKey } from '@/types/crm';
 import type { PipelineLead } from '@/types/crm';
 

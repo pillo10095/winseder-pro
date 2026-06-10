@@ -17,6 +17,17 @@ export default registerAs(
       synchronize: process.env.NODE_ENV !== 'production',
       logging: process.env.TYPEORM_LOGGING === 'true',
       migrationsRun: false,
-      migrations: ['dist/database/migrations/*.js']
+      migrations: ['dist/database/migrations/*.js'],
+      cache: {
+        type: 'redis',
+        duration: Number(process.env.TYPEORM_CACHE_TTL ?? '60000'),
+        options: {
+          host: process.env.REDIS_HOST ?? 'localhost',
+          port: parseInt(process.env.REDIS_PORT ?? '6379', 10),
+          username: process.env.REDIS_USERNAME,
+          password: process.env.REDIS_PASSWORD,
+        },
+        alwaysEnabled: process.env.TYPEORM_CACHE_ENABLED === 'true',
+      },
     }) as DatabaseConfig
 );

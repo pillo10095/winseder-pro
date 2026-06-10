@@ -15,7 +15,8 @@ export class ActivityRepository extends Repository<Activity> {
     contactId?: string,
     dealId?: string,
     limit = 50,
-  ): Promise<Activity[]> {
+    cursor?: string,
+  ): Promise<[Activity[], number]> {
     const qb = this.createQueryBuilder('a')
       .leftJoinAndSelect('a.contact', 'contact')
       .leftJoinAndSelect('a.deal', 'deal')
@@ -36,7 +37,11 @@ export class ActivityRepository extends Repository<Activity> {
       qb.andWhere('a.deal_id = :dealId', { dealId });
     }
 
-    return qb.getMany();
+    if (cursor) {
+      qb.andWhere('a.activity_date < :cursor', { cursor });
+    }
+
+    return qb.getManyAndCount();
   }
 
   async findByDateRange(

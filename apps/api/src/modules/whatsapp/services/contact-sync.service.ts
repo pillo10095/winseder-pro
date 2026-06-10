@@ -33,34 +33,47 @@ export class ContactSyncService {
     let created = 0;
     let skipped = 0;
 
-    for (const entry of contacts) {
-      if (!entry.id) continue;
-      const isIndividual = entry.id.endsWith('@s.whatsapp.net') || entry.id.endsWith('@lid');
-      if (!isIndividual) continue;
+    const individuals = contacts.filter(
+      (c) =>
+        c.id &&
+        (c.id.endsWith('@s.whatsapp.net') || c.id.endsWith('@lid')),
+    );
+    if (individuals.length === 0) return { created, skipped };
 
-      const phone = entry.id.split('@')[0];
-      if (!phone) continue;
+    const phones = individuals
+      .map((c) => c.id.split('@')[0])
+      .filter(Boolean);
+    if (phones.length === 0) return { created, skipped };
 
-      const existing = await this.contactRepo.findOne({
-        where: { phone, company_id: companyId },
-      });
+    const existingPhones = new Set(
+      (
+        await this.contactRepo.find({
+          where: phones.map((p) => ({ phone: p, company_id: companyId })),
+          select: ['phone'],
+        })
+      ).map((c) => c.phone),
+    );
 
-      if (existing) {
-        skipped++;
-        continue;
-      }
+    const toCreate = individuals.filter(
+      (c) => !existingPhones.has(c.id.split('@')[0]),
+    );
 
+    if (toCreate.length > 0) {
       await this.contactRepo.save(
-        this.contactRepo.create({
-          name: entry.name || phone,
-          phone,
-          wa_id: entry.id,
-          source: 'whatsapp',
-          company_id: companyId,
+        toCreate.map((c) => {
+          const phone = c.id.split('@')[0];
+          return this.contactRepo.create({
+            name: c.name || phone,
+            phone,
+            wa_id: c.id,
+            source: 'whatsapp',
+            company_id: companyId,
+          });
         }),
       );
-      created++;
+      created = toCreate.length;
     }
+    skipped = individuals.length - created;
 
     this.logger.log(
       `[${sessionId}] Phonebook sync: ${created} created, ${skipped} skipped`,
@@ -81,25 +94,37 @@ export class ContactSyncService {
     contacts: WaContactEntry[],
   ): Promise<SyncResult> {
     let created = 0;
+    let updated = 0;
     let skipped = 0;
 
-    for (const entry of contacts) {
-      if (!entry.id) continue;
-      const isIndividual = entry.id.endsWith('@s.whatsapp.net') || entry.id.endsWith('@lid');
-      if (!isIndividual) continue;
+    const individuals = contacts.filter(
+      (c) =>
+        c.id &&
+        (c.id.endsWith('@s.whatsapp.net') || c.id.endsWith('@lid')),
+    );
+    if (individuals.length === 0) return { created, skipped };
 
+    const waIds = individuals.map((c) => c.id);
+    const phones = individuals.map((c) => c.id.split('@')[0]).filter(Boolean);
+
+    const existingContacts = await this.contactRepo.find({
+      where: [
+        ...waIds.map((id) => ({ wa_id: id, company_id: companyId })),
+        ...phones.map((p) => ({ phone: p, company_id: companyId })),
+      ],
+    });
+
+    const existingByWaId = new Map(existingContacts.filter((c) => c.wa_id).map((c) => [c.wa_id, c]));
+    const existingByPhone = new Map(existingContacts.filter((c) => c.phone).map((c) => [c.phone, c]));
+
+    const toUpdate: Contact[] = [];
+    const toCreate: Array<{ name: string; phone: string; wa_id: string }> = [];
+
+    for (const entry of individuals) {
       const phone = entry.id.split('@')[0];
-      if (!phone) continue;
-
-      const existing = await this.contactRepo.findOne({
-        where: [
-          { wa_id: entry.id, company_id: companyId },
-          { phone, company_id: companyId },
-        ],
-      });
+      const existing = existingByWaId.get(entry.id) || existingByPhone.get(phone);
 
       if (existing) {
-        // Update wa_id if it was missing and update name
         let changed = false;
         if (!existing.wa_id) {
           existing.wa_id = entry.id;
@@ -110,26 +135,37 @@ export class ContactSyncService {
           changed = true;
         }
         if (changed) {
-          await this.contactRepo.save(existing);
+          toUpdate.push(existing);
+        } else {
+          skipped++;
         }
-        skipped++;
         continue;
       }
 
+      toCreate.push({ name: entry.name || phone, phone, wa_id: entry.id });
+    }
+
+    if (toUpdate.length > 0) {
+      await this.contactRepo.save(toUpdate);
+      updated = toUpdate.length;
+    }
+    if (toCreate.length > 0) {
       await this.contactRepo.save(
-        this.contactRepo.create({
-          name: entry.name || phone,
-          phone,
-          wa_id: entry.id,
-          source: 'whatsapp',
-          company_id: companyId,
-        }),
+        toCreate.map((c) =>
+          this.contactRepo.create({
+            name: c.name,
+            phone: c.phone,
+            wa_id: c.wa_id,
+            source: 'whatsapp',
+            company_id: companyId,
+          }),
+        ),
       );
-      created++;
+      created = toCreate.length;
     }
 
     this.logger.log(
-      `[${sessionId}] JID sync: ${created} created, ${skipped} updated/skipped`,
+      `[${sessionId}] JID sync: ${created} created, ${updated} updated, ${skipped} skipped`,
     );
 
     return { created, skipped };

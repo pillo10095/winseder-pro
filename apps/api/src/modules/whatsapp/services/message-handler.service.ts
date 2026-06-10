@@ -111,7 +111,7 @@ export class MessageHandlerService {
       },
     );
 
-    // Auto-create a CRM contact for individual JIDs
+    // Auto-create a CRM contact for individual JIDs (batched single query)
     const isIndividual = remoteJid.endsWith('@s.whatsapp.net') || remoteJid.endsWith('@lid');
     if (isIndividual && companyId) {
       const phone = remoteJid.split('@')[0];
@@ -121,6 +121,7 @@ export class MessageHandlerService {
             { wa_id: remoteJid, company_id: companyId },
             { phone, company_id: companyId },
           ],
+          select: ['id'],
         });
         if (!existing) {
           await this.contactRepo.save(

@@ -3,11 +3,11 @@ import type { PipelineLead } from '@/lib/crm-api';
 
 const baseLead: PipelineLead = {
   id: 'lead-1',
-  nombre: 'Carlos Martínez',
-  telefono: '5491112345678',
-  origen: 'whatsapp',
-  etapa: 'nuevo',
-  fecha_creacion: new Date().toISOString(),
+  name: 'Carlos Martínez',
+  value: 0,
+  probability: 0,
+  pipeline_stage_id: '',
+  created_at: new Date().toISOString(),
 };
 
 function makeRule(overrides: Partial<AutomationRule>): AutomationRule {

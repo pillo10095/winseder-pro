@@ -31,8 +31,9 @@ export class ActivityService {
     contactId?: string,
     dealId?: string,
     limit = 50,
-  ): Promise<Activity[]> {
-    return this.activityRepo.findByCompanyId(companyId, type, contactId, dealId, limit);
+    cursor?: string,
+  ): Promise<[Activity[], number]> {
+    return this.activityRepo.findByCompanyId(companyId, type, contactId, dealId, limit, cursor);
   }
 
   async findByCalendarRange(

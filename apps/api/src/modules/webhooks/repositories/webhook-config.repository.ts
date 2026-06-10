@@ -18,8 +18,9 @@ export class WebhookConfigRepository extends Repository<WebhookConfig> {
   }
 
   async findActiveByEvent(event: string): Promise<WebhookConfig[]> {
-    return this.find({ where: { is_active: true } }).then((configs) =>
-      configs.filter((c) => c.events.includes(event)),
-    );
+    return this.createQueryBuilder('w')
+      .where('w.is_active = :active', { active: true })
+      .andWhere('JSON_CONTAINS(w.events, :event, "$")', { event: JSON.stringify(event) })
+      .getMany();
   }
 }

@@ -121,27 +121,27 @@ export default function WhatsAppPage() {
     if (!activeSession) return;
 
     try {
-      const res = await fetchWithAuth(`${API_URL}/whatsapp/sessions/${activeSession}/qr`);
+      const [qrRes, statusRes] = await Promise.all([
+        fetchWithAuth(`${API_URL}/whatsapp/sessions/${activeSession}/qr`),
+        fetchWithAuth(`${API_URL}/whatsapp/sessions/${activeSession}/status`),
+      ]);
 
-      if (res.ok) {
-        const data = await res.json();
+      if (qrRes.ok) {
+        const data = await qrRes.json();
         setQrCode(data.data?.qr ?? data.qr ?? null);
+      }
 
-        // Also check status
-        const statusRes = await fetchWithAuth(`${API_URL}/whatsapp/sessions/${activeSession}/status`);
-        if (statusRes.ok) {
-          const statusData = await statusRes.json();
-          const newStatus = (statusData.data?.status ?? statusData.status ?? "").toLowerCase();
-          if (newStatus === "connected") {
-            setPolling(false);
-            setQrCode(null);
-            setActiveSession(null);
-            fetchSessions();
-            // Trigger contact extraction automatically
-            fetchWithAuth(`${API_URL}/whatsapp/sessions/${activeSession}/extract-contacts`, {
-              method: "POST",
-            }).catch(() => {});
-          }
+      if (statusRes.ok) {
+        const statusData = await statusRes.json();
+        const newStatus = (statusData.data?.status ?? statusData.status ?? "").toLowerCase();
+        if (newStatus === "connected") {
+          setPolling(false);
+          setQrCode(null);
+          setActiveSession(null);
+          fetchSessions();
+          fetchWithAuth(`${API_URL}/whatsapp/sessions/${activeSession}/extract-contacts`, {
+            method: "POST",
+          }).catch(() => {});
         }
       }
     } catch {
@@ -151,8 +151,8 @@ export default function WhatsAppPage() {
 
   useEffect(() => {
     if (!polling || !activeSession) return;
-    const interval = setInterval(fetchQr, 3000);
     fetchQr();
+    const interval = setInterval(fetchQr, 5000);
     return () => clearInterval(interval);
   }, [polling, activeSession, fetchQr]);
 

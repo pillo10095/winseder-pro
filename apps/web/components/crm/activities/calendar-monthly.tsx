@@ -1,11 +1,12 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useCalendarStore } from '@/stores/calendar-store';
 import {
   getMonthDays,
   isSameMonth,
   isToday,
-  getEventsForDay,
+  indexEventsByDate,
   LOCALE,
 } from '@/lib/date-utils';
 import { EventCard } from './event-card';
@@ -15,8 +16,13 @@ import { format } from 'date-fns';
 const DAY_HEADERS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
 export function CalendarMonthly() {
-  const { currentDate, events, next, prev, goToday } = useCalendarStore();
+  const currentDate = useCalendarStore(s => s.currentDate);
+  const events = useCalendarStore(s => s.events);
+  const next = useCalendarStore(s => s.next);
+  const prev = useCalendarStore(s => s.prev);
+  const goToday = useCalendarStore(s => s.goToday);
   const days = getMonthDays(currentDate);
+  const indexed = useMemo(() => indexEventsByDate(events), [events]);
 
   return (
     <div className="flex flex-col">
@@ -62,7 +68,8 @@ export function CalendarMonthly() {
       {/* Grid */}
       <div className="grid grid-cols-7 border-l border-t border-border">
         {days.map((day, i) => {
-          const dayEvents = getEventsForDay(events, day);
+          const key = format(day, 'yyyy-MM-dd');
+          const dayEvents = indexed.get(key) || [];
           const currentMonth = isSameMonth(day, currentDate);
 
           return (
