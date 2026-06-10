@@ -85,9 +85,17 @@ export class CampaignController {
   }
 
   @Get(':id/contacts')
-  async findContacts(@Param('id') id: string) {
-    const contacts = await this.campaignContactRepo.findByCampaignId(id);
-    return { data: contacts };
+  async findContacts(
+    @Param('id') id: string,
+    @Query('limit') limit?: string,
+    @Query('cursor') cursor?: string,
+  ) {
+    const [contacts, total] = await this.campaignContactRepo.findByCampaignId(
+      id,
+      limit ? parseInt(limit, 10) : 50,
+      cursor,
+    );
+    return { data: contacts, total };
   }
 
   @Put(':id/trigger')
@@ -97,7 +105,7 @@ export class CampaignController {
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    await this.campaignService.cancelCampaign(id);
+    await this.campaignService.remove(id);
     return { success: true };
   }
 }

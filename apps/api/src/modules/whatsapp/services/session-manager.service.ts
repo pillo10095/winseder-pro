@@ -46,7 +46,9 @@ export class SessionManagerService implements OnModuleInit {
     });
 
     // Auto-reconnect sessions that were CONNECTED before server restart
-    this.restoreSessions();
+    this.restoreSessions().catch((err) =>
+      this.logger.error('Failed to restore sessions on startup', err),
+    );
   }
 
   private async restoreSessions(): Promise<void> {
@@ -69,8 +71,11 @@ export class SessionManagerService implements OnModuleInit {
         await this.sessionRepository.update(session.id, {
           status: SessionStatus.CONNECTING,
         });
-        this.builderbotProvider.createSession(session.id, session.company_id).catch((err) => {
+        this.builderbotProvider.createSession(session.id, session.company_id).catch(async (err) => {
           this.logger.error(`Failed to restore session ${session.id}: ${err.message}`);
+          await this.sessionRepository.update(session.id, {
+            status: SessionStatus.DISCONNECTED,
+          });
         });
       }
     } catch (err) {
@@ -97,8 +102,11 @@ export class SessionManagerService implements OnModuleInit {
     );
 
     // Start BuilderBot connection in background (don't block the response)
-    this.builderbotProvider.createSession(session.id, companyId).catch((err) => {
+    this.builderbotProvider.createSession(session.id, companyId).catch(async (err) => {
       this.logger.error(`Failed to create session ${session.id}: ${err.message}`);
+      await this.sessionRepository.update(session.id, {
+        status: SessionStatus.DISCONNECTED,
+      });
     });
 
     return session;

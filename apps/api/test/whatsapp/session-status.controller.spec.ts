@@ -20,9 +20,7 @@ describe('SessionStatusController', () => {
     getSession: jest.fn(),
   };
 
-  function mockRequest(): Request {
-    return { companyId: 'company-1' } as Request;
-  }
+  const companyId = 'company-1';
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -32,7 +30,7 @@ describe('SessionStatusController', () => {
       ],
     })
       .overrideGuard(JwtAuthGuard)
-      .useValue({ canActivate: jest.fn().mockResolvedValue(true) })
+      .useValue({ canActivate: () => true })
       .compile();
 
     controller = module.get<SessionStatusController>(SessionStatusController);
@@ -45,7 +43,7 @@ describe('SessionStatusController', () => {
     it('should return QR code', async () => {
       mockSessionManager.getQrCode.mockResolvedValue('data:image/png;base64,qr-data');
 
-      const result = await controller.getQr('session-1', mockRequest());
+      const result = await controller.getQr('session-1', companyId);
 
       expect(sessionManager.getQrCode).toHaveBeenCalledWith('session-1', 'company-1');
       expect(result).toEqual({ data: { qr: 'data:image/png;base64,qr-data' } });
@@ -54,7 +52,7 @@ describe('SessionStatusController', () => {
     it('should return null QR with message when QR not ready', async () => {
       mockSessionManager.getQrCode.mockRejectedValue(new Error('QR code not yet generated'));
 
-      const result = await controller.getQr('session-1', mockRequest());
+      const result = await controller.getQr('session-1', companyId);
 
       expect(result).toEqual({ data: { qr: null, message: 'QR code not yet generated' } });
     });
@@ -62,7 +60,7 @@ describe('SessionStatusController', () => {
     it('should handle non-Error rejection gracefully', async () => {
       mockSessionManager.getQrCode.mockRejectedValue('string error');
 
-      const result = await controller.getQr('session-1', mockRequest());
+      const result = await controller.getQr('session-1', companyId);
 
       expect(result).toEqual({ data: { qr: null, message: 'QR not available' } });
     });
@@ -79,7 +77,7 @@ describe('SessionStatusController', () => {
       };
       mockSessionManager.getSession.mockResolvedValue(session);
 
-      const result = await controller.getStatus('session-1', mockRequest());
+      const result = await controller.getStatus('session-1', companyId);
 
       expect(sessionManager.getSession).toHaveBeenCalledWith('session-1', 'company-1');
       expect(result).toEqual({
@@ -96,7 +94,7 @@ describe('SessionStatusController', () => {
     it('should return error when session not found', async () => {
       mockSessionManager.getSession.mockResolvedValue(null);
 
-      const result = await controller.getStatus('session-404', mockRequest());
+      const result = await controller.getStatus('session-404', companyId);
 
       expect(result).toEqual({ error: 'Session not found' });
     });

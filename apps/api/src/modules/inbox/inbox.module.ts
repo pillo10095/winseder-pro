@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { AuthModule } from '../auth/auth.module';
 import { ConversationNote } from './entities/conversation-note.entity';
 import { ConversationNoteRepository } from './repositories/conversation-note.repository';
 import { InboxService } from './services/inbox.service';
@@ -11,6 +12,7 @@ import { WhatsAppModule } from '../whatsapp/whatsapp.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([ConversationNote]),
+    AuthModule,
     WhatsAppModule,
   ],
   controllers: [InboxController, NotesController],

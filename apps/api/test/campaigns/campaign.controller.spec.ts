@@ -4,6 +4,7 @@ import { CampaignController } from '@/modules/campaigns/controllers/campaign.con
 import { CampaignService } from '@/modules/campaigns/services/campaign.service';
 import { CsvImportService } from '@/modules/campaigns/services/csv-import.service';
 import { CampaignContactRepository } from '@/modules/campaigns/repositories/campaign-contact.repository';
+import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 
 describe('CampaignController', () => {
   let controller: CampaignController;
@@ -19,6 +20,7 @@ describe('CampaignController', () => {
     pauseCampaign: jest.fn(),
     resumeCampaign: jest.fn(),
     cancelCampaign: jest.fn(),
+    remove: jest.fn(),
   };
 
   const mockCsvImportService = {
@@ -39,7 +41,10 @@ describe('CampaignController', () => {
         { provide: CsvImportService, useValue: mockCsvImportService },
         { provide: CampaignContactRepository, useValue: mockCampaignContactRepo },
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<CampaignController>(CampaignController);
     campaignService = module.get<CampaignService>(CampaignService);
@@ -174,32 +179,32 @@ describe('CampaignController', () => {
   });
 
   describe('GET /campaigns/:id/contacts', () => {
-    it('should return campaign contacts', async () => {
+    it('should return campaign contacts with pagination', async () => {
       const contacts = [{ id: 'contact-1', campaign_id: 'camp-1' }];
-      mockCampaignContactRepo.findByCampaignId.mockResolvedValue(contacts);
+      mockCampaignContactRepo.findByCampaignId.mockResolvedValue([contacts, 1]);
 
-      const result = await controller.findContacts('camp-1');
+      const result = await controller.findContacts('camp-1', '50', undefined);
 
-      expect(campaignContactRepo.findByCampaignId).toHaveBeenCalledWith('camp-1');
-      expect(result).toEqual({ data: contacts });
+      expect(campaignContactRepo.findByCampaignId).toHaveBeenCalledWith('camp-1', 50, undefined);
+      expect(result).toEqual({ data: contacts, total: 1 });
     });
 
     it('should return empty array when no contacts', async () => {
-      mockCampaignContactRepo.findByCampaignId.mockResolvedValue([]);
+      mockCampaignContactRepo.findByCampaignId.mockResolvedValue([[], 0]);
 
-      const result = await controller.findContacts('camp-1');
+      const result = await controller.findContacts('camp-1', undefined, undefined);
 
-      expect(result).toEqual({ data: [] });
+      expect(result).toEqual({ data: [], total: 0 });
     });
   });
 
   describe('DELETE /campaigns/:id', () => {
-    it('should cancel and remove a campaign', async () => {
-      mockCampaignService.cancelCampaign.mockResolvedValue(undefined);
+    it('should remove a campaign', async () => {
+      mockCampaignService.remove.mockResolvedValue(undefined);
 
       const result = await controller.remove('camp-1');
 
-      expect(campaignService.cancelCampaign).toHaveBeenCalledWith('camp-1');
+      expect(campaignService.remove).toHaveBeenCalledWith('camp-1');
       expect(result).toEqual({ success: true });
     });
   });

@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -11,6 +12,7 @@ import {
 import { Company } from '../../tenancy/entities/company.entity';
 
 @Entity('pipeline_stages')
+@Index('IDX_PS_COMPANY', ['company_id'])
 export class PipelineStage {
   @PrimaryGeneratedColumn('uuid')
   id!: string;

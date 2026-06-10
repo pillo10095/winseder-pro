@@ -33,6 +33,9 @@ export class PipelineLeadsController {
     return { data, total, page: filters.page ?? 1, limit: filters.limit ?? 20 };
   }
 
+  // ⚠️ Literal routes (stats) MUST stay BEFORE parameterized :id.
+  // NestJS registers routes in declaration order; if :id comes first,
+  // 'stats' would match as a deal ID instead of the stats endpoint.
   @Get('stats')
   async getStats(@CompanyId() companyId: string) {
     return this.dealService.getStats(companyId);

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { AuthModule } from '../auth/auth.module';
 import { WebhookConfig } from './entities/webhook-config.entity';
 import { WebhookConfigRepository } from './repositories/webhook-config.repository';
 import { WebhookSignatureService } from './services/webhook-signature.service';
@@ -9,7 +10,10 @@ import { WebhookEventBusService } from './services/webhook-event-bus.service';
 import { WebhookConfigController } from './controllers/webhook-config.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([WebhookConfig])],
+  imports: [
+    TypeOrmModule.forFeature([WebhookConfig]),
+    AuthModule,
+  ],
   controllers: [WebhookConfigController],
   providers: [
     WebhookConfigRepository,

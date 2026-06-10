@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import { User, UserRole } from '../../auth/entities/user.entity';
 import { Company } from '../../tenancy/entities/company.entity';
@@ -86,7 +86,7 @@ export class SuperAdminService {
     })).map((s) => s.id);
 
     const messages = sessionIds.length > 0
-      ? await this.messageRepo.count({ where: { session_id: sessionIds.length === 1 ? sessionIds[0] : undefined } })
+      ? await this.messageRepo.count({ where: { session_id: In(sessionIds) } })
       : 0;
 
     // Find active subscription

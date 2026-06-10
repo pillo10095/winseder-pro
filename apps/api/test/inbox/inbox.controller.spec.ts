@@ -3,6 +3,7 @@ import { NotFoundException } from '@nestjs/common';
 
 import { InboxController } from '@/modules/inbox/controllers/inbox.controller';
 import { InboxService } from '@/modules/inbox/services/inbox.service';
+import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 import { ConversationStatus } from '@/modules/whatsapp/entities/conversation.entity';
 
 describe('InboxController', () => {
@@ -21,7 +22,10 @@ describe('InboxController', () => {
       providers: [
         { provide: InboxService, useValue: mockInbox },
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<InboxController>(InboxController);
     inbox = module.get<InboxService>(InboxService);

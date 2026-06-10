@@ -26,7 +26,7 @@ describe('TemplateService', () => {
       findOne: jest.fn().mockResolvedValue(mockTemplate),
       update: jest.fn().mockResolvedValue(undefined),
       delete: jest.fn().mockResolvedValue(undefined),
-      findByCompanyId: jest.fn().mockResolvedValue([mockTemplate]),
+      findByCompanyId: jest.fn().mockResolvedValue([[mockTemplate], 1]),
     } as any;
 
     const module: TestingModule = await Test.createTestingModule({
@@ -101,32 +101,40 @@ describe('TemplateService', () => {
     });
   });
 
-  describe('findByCompanyId', () => {
-    it('should return templates for company', async () => {
+    describe('findByCompanyId', () => {
+    it('should return templates for company with pagination', async () => {
+      templateRepo.findByCompanyId.mockResolvedValue([[mockTemplate], 1]);
+
       const result = await service.findByCompanyId('company-1');
 
-      expect(result).toEqual([mockTemplate]);
+      expect(result).toEqual([[mockTemplate], 1]);
       expect(templateRepo.findByCompanyId).toHaveBeenCalledWith(
         'company-1',
+        undefined,
+        20,
         undefined,
       );
     });
 
-    it('should pass search filter', async () => {
-      await service.findByCompanyId('company-1', 'welcome');
+    it('should pass search filter and pagination', async () => {
+      templateRepo.findByCompanyId.mockResolvedValue([[mockTemplate], 1]);
+
+      await service.findByCompanyId('company-1', 'welcome', 50, 'cursor-1');
 
       expect(templateRepo.findByCompanyId).toHaveBeenCalledWith(
         'company-1',
         'welcome',
+        50,
+        'cursor-1',
       );
     });
 
     it('should return empty array when none match', async () => {
-      templateRepo.findByCompanyId.mockResolvedValue([]);
+      templateRepo.findByCompanyId.mockResolvedValue([[], 0]);
 
       const result = await service.findByCompanyId('company-1', 'zzz');
 
-      expect(result).toEqual([]);
+      expect(result).toEqual([[], 0]);
     });
   });
 

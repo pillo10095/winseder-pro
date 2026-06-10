@@ -3,6 +3,7 @@ import { NotFoundException } from '@nestjs/common';
 
 import { TemplateController } from '@/modules/campaigns/controllers/template.controller';
 import { TemplateService } from '@/modules/campaigns/services/template.service';
+import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 
 describe('TemplateController', () => {
   let controller: TemplateController;
@@ -24,7 +25,10 @@ describe('TemplateController', () => {
       providers: [
         { provide: TemplateService, useValue: mockTemplateService },
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<TemplateController>(TemplateController);
     templateService = module.get<TemplateService>(TemplateService);
@@ -33,32 +37,32 @@ describe('TemplateController', () => {
   });
 
   describe('GET /campaigns/templates', () => {
-    it('should return templates list', async () => {
+    it('should return templates list with pagination', async () => {
       const templates = [{ id: 'tmpl-1', name: 'Welcome' }];
-      mockTemplateService.findByCompanyId.mockResolvedValue(templates);
+      mockTemplateService.findByCompanyId.mockResolvedValue([templates, 1]);
 
-      const result = await controller.findAll(companyId, undefined);
+      const result = await controller.findAll(companyId, undefined, '20', undefined);
 
-      expect(templateService.findByCompanyId).toHaveBeenCalledWith(companyId, undefined);
-      expect(result).toEqual({ data: templates });
+      expect(templateService.findByCompanyId).toHaveBeenCalledWith(companyId, undefined, 20, undefined);
+      expect(result).toEqual({ data: templates, total: 1 });
     });
 
     it('should filter by search term', async () => {
       const templates = [{ id: 'tmpl-2', name: 'Promo' }];
-      mockTemplateService.findByCompanyId.mockResolvedValue(templates);
+      mockTemplateService.findByCompanyId.mockResolvedValue([templates, 1]);
 
-      const result = await controller.findAll(companyId, 'Promo');
+      const result = await controller.findAll(companyId, 'Promo', '20', undefined);
 
-      expect(templateService.findByCompanyId).toHaveBeenCalledWith(companyId, 'Promo');
-      expect(result).toEqual({ data: templates });
+      expect(templateService.findByCompanyId).toHaveBeenCalledWith(companyId, 'Promo', 20, undefined);
+      expect(result).toEqual({ data: templates, total: 1 });
     });
 
     it('should return empty array when no templates', async () => {
-      mockTemplateService.findByCompanyId.mockResolvedValue([]);
+      mockTemplateService.findByCompanyId.mockResolvedValue([[], 0]);
 
-      const result = await controller.findAll(companyId, undefined);
+      const result = await controller.findAll(companyId, undefined, undefined, undefined);
 
-      expect(result).toEqual({ data: [] });
+      expect(result).toEqual({ data: [], total: 0 });
     });
   });
 

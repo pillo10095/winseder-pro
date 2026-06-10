@@ -2,12 +2,11 @@ import {
   Controller,
   Get,
   Param,
-  Req,
   UseGuards,
 } from '@nestjs/common';
-import { Request } from 'express';
 
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { CompanyId } from '../../../common/decorators/company-id.decorator';
 import { SessionManagerService } from '../services/session-manager.service';
 
 @Controller('whatsapp/sessions')
@@ -19,9 +18,12 @@ export class SessionStatusController {
    * Get QR code for a session that is in QR_CODE status.
    */
   @Get(':id/qr')
-  async getQr(@Param('id') id: string, @Req() req: Request) {
+  async getQr(
+    @Param('id') id: string,
+    @CompanyId() companyId: string,
+  ) {
     try {
-      const qr = await this.sessionManager.getQrCode(id, req.companyId!);
+      const qr = await this.sessionManager.getQrCode(id, companyId);
       return { data: { qr } };
     } catch (err: unknown) {
       // QR not ready yet — client should listen via WebSocket
@@ -34,8 +36,11 @@ export class SessionStatusController {
    * Get current status of a session.
    */
   @Get(':id/status')
-  async getStatus(@Param('id') id: string, @Req() req: Request) {
-    const session = await this.sessionManager.getSession(id, req.companyId!);
+  async getStatus(
+    @Param('id') id: string,
+    @CompanyId() companyId: string,
+  ) {
+    const session = await this.sessionManager.getSession(id, companyId);
     if (!session) {
       return { error: 'Session not found' };
     }

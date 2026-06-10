@@ -5,14 +5,18 @@ import {
   Param,
   Patch,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 
-import { ConversationStatus } from '../../whatsapp/entities/conversation.entity';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { CompanyId } from '../../../common/decorators/company-id.decorator';
 import { InboxService } from '../services/inbox.service';
 import { AssignConversationDto } from '../dto/assign-conversation.dto';
 import { UpdateConversationStatusDto } from '../dto/update-conversation-status.dto';
+import { ConversationStatus } from '../../whatsapp/entities/conversation.entity';
 
 @Controller('inbox')
+@UseGuards(JwtAuthGuard)
 export class InboxController {
   constructor(private readonly inbox: InboxService) {}
 

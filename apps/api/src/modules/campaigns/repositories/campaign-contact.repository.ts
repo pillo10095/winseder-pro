@@ -9,12 +9,22 @@ export class CampaignContactRepository extends Repository<CampaignContact> {
     super(CampaignContact, dataSource.createEntityManager());
   }
 
-  async findByCampaignId(campaignId: string): Promise<CampaignContact[]> {
-    return this.createQueryBuilder('cc')
+  async findByCampaignId(
+    campaignId: string,
+    limit = 50,
+    cursor?: string,
+  ): Promise<[CampaignContact[], number]> {
+    const qb = this.createQueryBuilder('cc')
       .leftJoinAndSelect('cc.contact', 'contact')
       .where('cc.campaign_id = :campaignId', { campaignId })
       .orderBy('cc.created_at', 'ASC')
-      .getMany();
+      .take(limit);
+
+    if (cursor) {
+      qb.andWhere('cc.created_at > :cursor', { cursor });
+    }
+
+    return qb.getManyAndCount();
   }
 
   async countByCampaignIdAndStatus(

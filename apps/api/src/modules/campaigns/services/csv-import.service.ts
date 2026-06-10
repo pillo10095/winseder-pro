@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import * as fs from 'node:fs';
+import { promises as fs } from 'node:fs';
 
 import { Contact } from '../../crm/entities/contact.entity';
 import { CampaignContact } from '../entities/campaign-contact.entity';
@@ -21,7 +21,7 @@ export class CsvImportService {
     campaignId: string,
     filePath: string,
   ): Promise<{ imported: number; errors: string[] }> {
-    const content = fs.readFileSync(filePath, 'utf-8');
+    const content = await fs.readFile(filePath, 'utf-8');
     return this.importFromCsv(companyId, campaignId, content);
   }
 

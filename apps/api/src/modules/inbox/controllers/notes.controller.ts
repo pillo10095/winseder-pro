@@ -4,12 +4,16 @@ import {
   Get,
   Param,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { InboxService } from '../services/inbox.service';
 import { CreateNoteDto } from '../dto/create-note.dto';
 
 @Controller('conversations/:conversationId/notes')
+@UseGuards(JwtAuthGuard)
 export class NotesController {
   constructor(private readonly inbox: InboxService) {}
 
@@ -22,8 +26,8 @@ export class NotesController {
   async create(
     @Param('conversationId') conversationId: string,
     @Body() dto: CreateNoteDto,
+    @CurrentUser('id') userId: string,
   ): Promise<unknown> {
-    // TODO: get author_id from current authenticated user
-    return this.inbox.addNote(conversationId, 'system', dto.content);
+    return this.inbox.addNote(conversationId, userId, dto.content);
   }
 }

@@ -24,9 +24,16 @@ export class TemplateController {
   async findAll(
     @CompanyId() companyId: string,
     @Query('search') search?: string,
+    @Query('limit') limit?: string,
+    @Query('cursor') cursor?: string,
   ) {
-    const templates = await this.templateService.findByCompanyId(companyId, search);
-    return { data: templates };
+    const [templates, total] = await this.templateService.findByCompanyId(
+      companyId,
+      search,
+      limit ? parseInt(limit, 10) : 20,
+      cursor,
+    );
+    return { data: templates, total };
   }
 
   @Get(':id')

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
@@ -21,6 +21,10 @@ export class CampaignService {
   ) {}
 
   async create(companyId: string, dto: CreateCampaignDto): Promise<Campaign> {
+    if (!companyId) {
+      throw new BadRequestException('Company ID no encontrado en el token de autenticación');
+    }
+
     const campaign = await this.campaignRepo.save(
       this.campaignRepo.create({
         name: dto.name,
@@ -128,6 +132,11 @@ export class CampaignService {
 
   async cancelCampaign(id: string): Promise<void> {
     await this.updateStatus(id, 'cancelled');
+  }
+
+  async remove(id: string): Promise<void> {
+    await this.cancelCampaign(id);
+    await this.campaignRepo.delete(id);
   }
 
   async setTriggerEvent(id: string, triggerEvent: { type: string; stage_id: string } | null): Promise<Campaign> {

@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   JoinTable,
   ManyToMany,
@@ -14,6 +15,7 @@ import { Company } from '../../tenancy/entities/company.entity';
 import { Label } from './label.entity';
 
 @Entity('contacts')
+@Index('IDX_CONTACTS_COMPANY', ['company_id'])
 export class Contact {
   @PrimaryGeneratedColumn('uuid')
   id!: string;

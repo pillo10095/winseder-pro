@@ -17,8 +17,8 @@ export class TemplateService {
     );
   }
 
-  async findByCompanyId(companyId: string, search?: string): Promise<Template[]> {
-    return this.templateRepo.findByCompanyId(companyId, search);
+  async findByCompanyId(companyId: string, search?: string, limit = 20, cursor?: string): Promise<[Template[], number]> {
+    return this.templateRepo.findByCompanyId(companyId, search, limit, cursor);
   }
 
   async findById(id: string): Promise<Template | null> {

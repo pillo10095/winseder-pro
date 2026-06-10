@@ -4,6 +4,10 @@ import { Request } from 'express';
 /**
  * Webhook endpoint for Baileys events.
  * Used as a fallback/alternative to WebSocket for receiving events.
+ *
+ * Intentionally public — Meta/WhatsApp callbacks cannot carry a JWT.
+ * TODO: Add IP allow-list (Meta published IP ranges) and HMAC signature
+ * validation once the upstream sender is confirmed and documented.
  */
 @Controller('whatsapp/webhook')
 export class WebhookController {

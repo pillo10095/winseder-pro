@@ -12,15 +12,22 @@ export class TemplateRepository extends Repository<Template> {
   async findByCompanyId(
     companyId: string,
     search?: string,
-  ): Promise<Template[]> {
+    limit = 20,
+    cursor?: string,
+  ): Promise<[Template[], number]> {
     const qb = this.createQueryBuilder('t')
       .where('t.company_id = :companyId', { companyId })
-      .orderBy('t.created_at', 'DESC');
+      .orderBy('t.created_at', 'DESC')
+      .take(limit);
 
     if (search) {
       qb.andWhere('t.name LIKE :search', { search: `%${search}%` });
     }
 
-    return qb.getMany();
+    if (cursor) {
+      qb.andWhere('t.created_at < :cursor', { cursor });
+    }
+
+    return qb.getManyAndCount();
   }
 }

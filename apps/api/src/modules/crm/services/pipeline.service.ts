@@ -11,9 +11,8 @@ export class PipelineService {
   constructor(private readonly stageRepo: PipelineStageRepository) {}
 
   async create(companyId: string, dto: CreatePipelineStageDto): Promise<PipelineStage> {
-    const maxOrder = await this.stageRepo
-      .findByCompanyId(companyId)
-      .then((stages) => stages.length);
+    const stages = await this.stageRepo.findByCompanyId(companyId);
+    const maxOrder = stages.length;
 
     return this.stageRepo.save(
       this.stageRepo.create({

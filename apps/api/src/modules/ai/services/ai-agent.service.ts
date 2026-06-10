@@ -69,15 +69,17 @@ export class AiAgentService {
 
     const response = await this.provider.chat(config, messages);
 
-    await this.logRepo.save({
-      company_id: companyId,
-      agent_id: agent.id,
-      type: 'chat',
-      prompt: message,
-      response: response.content,
-      tokens_used: response.tokensUsed,
-      duration_ms: response.durationMs,
-    } as Record<string, unknown>);
+    await this.logRepo.save(
+      this.logRepo.create({
+        company_id: companyId,
+        agent_id: agent.id,
+        type: 'chat',
+        prompt: message,
+        response: response.content,
+        tokens_used: response.tokensUsed,
+        duration_ms: response.durationMs,
+      }),
+    );
 
     return { reply: response.content };
   }

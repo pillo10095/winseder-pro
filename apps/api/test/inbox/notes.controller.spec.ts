@@ -3,6 +3,7 @@ import { NotFoundException } from '@nestjs/common';
 
 import { NotesController } from '@/modules/inbox/controllers/notes.controller';
 import { InboxService } from '@/modules/inbox/services/inbox.service';
+import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 
 describe('NotesController', () => {
   let controller: NotesController;
@@ -19,7 +20,10 @@ describe('NotesController', () => {
       providers: [
         { provide: InboxService, useValue: mockInbox },
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<NotesController>(NotesController);
     inbox = module.get<InboxService>(InboxService);
@@ -50,13 +54,13 @@ describe('NotesController', () => {
   });
 
   describe('POST :conversationId/notes', () => {
-    it('should create a note with system author', async () => {
-      const note = { id: 'note-1', content: 'New note', author_id: 'system' };
+    it('should create a note with authenticated user as author', async () => {
+      const note = { id: 'note-1', content: 'New note', author_id: 'test-user' };
       mockInbox.addNote.mockResolvedValue(note);
 
-      const result = await controller.create('conv-1', { content: 'New note' });
+      const result = await controller.create('conv-1', { content: 'New note' }, 'test-user');
 
-      expect(inbox.addNote).toHaveBeenCalledWith('conv-1', 'system', 'New note');
+      expect(inbox.addNote).toHaveBeenCalledWith('conv-1', 'test-user', 'New note');
       expect(result).toEqual(note);
     });
 

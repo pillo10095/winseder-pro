@@ -46,21 +46,25 @@ export class ChatbotListenerService {
       for (const rule of matched) {
         for (const action of rule.actions) {
           if (action.type === 'webhook') {
-            // Dispatch to webhooks that subscribe to 'message.inbound'
             const webhooks = await this.webhookRepo.findActiveByEvent('message.inbound');
-            // Fire and forget
-            webhooks.forEach((wh) => {
-              const url = action.config.url || wh.url;
-              if (url) {
-                fetch(url, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ event: 'message.inbound', data: payload }),
-                }).catch(() => {
-                  // silent
-                });
-              }
-            });
+            await Promise.allSettled(
+              webhooks.map(async (wh) => {
+                const url = action.config.url || wh.url;
+                if (!url) return;
+                try {
+                  const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ event: 'message.inbound', data: payload }),
+                  });
+                  if (!res.ok) {
+                    this.logger.warn(`Webhook returned ${res.status}: ${url}`);
+                  }
+                } catch (error) {
+                  this.logger.error(`Webhook dispatch failed: ${url} — ${(error as Error).message}`);
+                }
+              }),
+            );
           } else {
             await this.autoReply.execute({
               companyId: session.company_id,

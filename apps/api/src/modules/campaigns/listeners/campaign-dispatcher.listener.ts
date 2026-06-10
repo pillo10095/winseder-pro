@@ -40,7 +40,7 @@ export class CampaignDispatcherListener {
       }
 
       // Fetch contacts with their phone numbers
-      const campaignContacts = await this.campaignContactRepo.findByCampaignId(campaignId);
+      const [campaignContacts] = await this.campaignContactRepo.findByCampaignId(campaignId);
 
       if (campaignContacts.length === 0) {
         this.logger.warn(`[Dispatcher] Campaña ${campaignId} no tiene contactos — cancelando`);
@@ -73,8 +73,8 @@ export class CampaignDispatcherListener {
       // Build contacts array and variables map for the worker
       const contacts = validContacts.map((cc) => ({
         id: cc.contact_id,
-        phone: cc.contact!.phone!,
-        name: cc.contact!.name,
+        phone: cc.contact?.phone ?? '',
+        name: cc.contact?.name ?? '',
       }));
 
       const variablesMap: Record<string, Record<string, string>> = {};

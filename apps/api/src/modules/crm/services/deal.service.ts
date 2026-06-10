@@ -88,47 +88,33 @@ export class DealService {
     conversion_rate: number;
     by_stage: { stage_name: string; stage_color: string; count: number; value: number }[];
   }> {
-    const totalsQb = this.dealRepo.createQueryBuilder('deal')
-      .leftJoin('deal.pipeline_stage', 'stage')
-      .where('deal.company_id = :companyId', { companyId })
-      .select([
-        'COUNT(deal.id) as total_deals',
-        'COALESCE(SUM(deal.value), 0) as total_value',
-        'COALESCE(AVG(deal.value), 0) as avg_value',
-      ]);
-
-    const totals = await totalsQb.getRawOne();
-    const totalDeals = Number(totals?.total_deals) || 0;
-    const totalValue = Number(totals?.total_value) || 0;
-
-    // Count won deals (cerrado_ganado or similar)
-    const allStages = await this.dealRepo.createQueryBuilder('deal')
-      .leftJoin('deal.pipeline_stage', 'stage')
-      .where('deal.company_id = :companyId', { companyId })
-      .select(['stage.name as stage_name', 'COUNT(deal.id) as cnt'])
-      .groupBy('stage.name')
-      .getRawMany();
-
-    const wonCounts = allStages.filter(
-      (s: any) => s.stage_name?.toLowerCase().includes('ganado') || s.stage_name?.toLowerCase().includes('won'),
-    );
-    const wonTotal = wonCounts.reduce((sum: number, s: any) => sum + Number(s.cnt || 0), 0);
-    const conversionRate = totalDeals > 0 ? (wonTotal / totalDeals) * 100 : 0;
-
-    // Stats by stage
+    // Single query: totals + per-stage breakdown + won detection
     const byStage = await this.dealRepo.createQueryBuilder('deal')
       .leftJoin('deal.pipeline_stage', 'stage')
       .where('deal.company_id = :companyId', { companyId })
       .select([
         'stage.name as stage_name',
         'stage.color as stage_color',
+        'MAX(stage.sort_order) as sort_order',
         'COUNT(deal.id) as count',
         'COALESCE(SUM(deal.value), 0) as value',
       ])
       .groupBy('stage.name')
       .addGroupBy('stage.color')
-      .orderBy('stage.sort_order', 'ASC')
+      .orderBy('MAX(stage.sort_order)', 'ASC')
       .getRawMany();
+
+    const totalDeals = byStage.reduce((sum: number, s: any) => sum + Number(s.count || 0), 0);
+    const totalValue = byStage.reduce((sum: number, s: any) => sum + Number(s.value || 0), 0);
+
+    const wonTotal = byStage
+      .filter((s: any) => {
+        const name = (s.stage_name ?? '').toLowerCase();
+        return name.includes('ganado') || name.includes('won');
+      })
+      .reduce((sum: number, s: any) => sum + Number(s.count || 0), 0);
+
+    const conversionRate = totalDeals > 0 ? (wonTotal / totalDeals) * 100 : 0;
 
     return {
       total_deals: totalDeals,
